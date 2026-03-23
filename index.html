@@ -499,10 +499,22 @@
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
     <h3>AI Settings</h3>
-    <p style="font-size:13px;color:var(--text3);margin-bottom:20px;">输入你的 Gemini API Key，获取地址：<a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a></p>
-    <div>
+    <div style="margin-bottom:16px;">
+      <label>AI Provider</label>
+      <select id="settings-provider" onchange="onProviderChange()" style="width:100%;margin-top:4px;">
+        <option value="gemini">Gemini (gemini-2.5-flash)</option>
+        <option value="deepseek">DeepSeek (deepseek-chat)</option>
+      </select>
+    </div>
+    <div id="settings-gemini-section">
+      <p style="font-size:13px;color:var(--text3);margin-bottom:8px;">获取地址：<a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a></p>
       <label>Gemini API Key</label>
-      <input type="password" id="settings-key-input" placeholder="AIza...">
+      <input type="password" id="settings-gemini-key" placeholder="AIza...">
+    </div>
+    <div id="settings-deepseek-section" style="display:none;">
+      <p style="font-size:13px;color:var(--text3);margin-bottom:8px;">获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:var(--accent)">platform.deepseek.com</a></p>
+      <label>DeepSeek API Key</label>
+      <input type="password" id="settings-deepseek-key" placeholder="sk-...">
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
@@ -623,15 +635,23 @@ function saveToFile() {
   URL.revokeObjectURL(url);
 }
 
-// ─── AI AUTOFILL (Gemini direct) ──────────────────────────────────────────────
+// ─── AI AUTOFILL ──────────────────────────────────────────────────────────────
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_KEY_STORAGE = 'lexicon_gemini_key';
+const DEEPSEEK_KEY_STORAGE = 'lexicon_deepseek_key';
+const PROVIDER_STORAGE = 'lexicon_ai_provider';
 
 let aiFillInFlight = false;
 let aiFillLastAt = 0;
 
+function getProvider() {
+  return localStorage.getItem(PROVIDER_STORAGE) || 'gemini';
+}
 function getApiKey() {
   return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+}
+function getDeepSeekKey() {
+  return localStorage.getItem(DEEPSEEK_KEY_STORAGE) || '';
 }
 
 function setAiBtnState(loading) {
@@ -663,7 +683,8 @@ async function aiFill() {
   const pos = document.getElementById('inp-pos')?.value || '';
   if (!word) { alert('请先输入 Word。'); return; }
 
-  const apiKey = getApiKey();
+  const provider = getProvider();
+  const apiKey = provider === 'deepseek' ? getDeepSeekKey() : getApiKey();
   if (!apiKey) { openSettings(); return; }
 
   const now = Date.now();
@@ -697,25 +718,42 @@ async function aiFill() {
       pos ? `User-specified part of speech (use this if provided): ${pos}` : ''
     ].filter(Boolean).join('\n');
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
+    let text = '';
+
+    if (provider === 'deepseek') {
+      const r = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [{ role: 'user', content: prompt }],
           temperature: 0.2,
-          maxOutputTokens: 320,
-          responseMimeType: 'application/json',
-          thinkingConfig: { thinkingBudget: 0 }
-        }
-      })
-    });
+          max_tokens: 320
+        })
+      });
+      const data = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
+      text = data?.choices?.[0]?.message?.content || '';
+    } else {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 320,
+            responseMimeType: 'application/json',
+            thinkingConfig: { thinkingBudget: 0 }
+          }
+        })
+      });
+      const data = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
+      text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('\n') || '';
+    }
 
-    const data = await r.json().catch(() => null);
-    if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
-
-    const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('\n') || '';
     const obj = extractJsonObject(text);
     if (!obj) throw new Error('无法解析 AI 返回的内容');
 
@@ -740,17 +778,31 @@ async function aiFill() {
 }
 
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function onProviderChange() {
+  const p = document.getElementById('settings-provider').value;
+  document.getElementById('settings-gemini-section').style.display = p === 'gemini' ? '' : 'none';
+  document.getElementById('settings-deepseek-section').style.display = p === 'deepseek' ? '' : 'none';
+}
 function openSettings() {
-  document.getElementById('settings-key-input').value = getApiKey();
+  const provider = getProvider();
+  document.getElementById('settings-provider').value = provider;
+  document.getElementById('settings-gemini-key').value = getApiKey();
+  document.getElementById('settings-deepseek-key').value = getDeepSeekKey();
+  onProviderChange();
   document.getElementById('settings-modal').classList.add('open');
 }
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('open');
 }
 function saveSettings() {
-  const key = document.getElementById('settings-key-input').value.trim();
-  if (!key) { alert('请输入 API Key。'); return; }
-  localStorage.setItem(GEMINI_KEY_STORAGE, key);
+  const provider = document.getElementById('settings-provider').value;
+  const geminiKey = document.getElementById('settings-gemini-key').value.trim();
+  const deepseekKey = document.getElementById('settings-deepseek-key').value.trim();
+  const activeKey = provider === 'deepseek' ? deepseekKey : geminiKey;
+  if (!activeKey) { alert('请输入 API Key。'); return; }
+  localStorage.setItem(PROVIDER_STORAGE, provider);
+  if (geminiKey) localStorage.setItem(GEMINI_KEY_STORAGE, geminiKey);
+  if (deepseekKey) localStorage.setItem(DEEPSEEK_KEY_STORAGE, deepseekKey);
   closeSettings();
 }
 document.getElementById('settings-modal').addEventListener('click', e => {
