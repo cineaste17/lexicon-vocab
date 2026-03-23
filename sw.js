@@ -1,4 +1,4 @@
-const CACHE = 'lexicon-v2';
+const CACHE = 'lexicon-v3';
 const ASSETS = ['./index.html', './'];
 
 self.addEventListener('install', e => {
