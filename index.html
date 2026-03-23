@@ -22,6 +22,9 @@
     --accent-hover: #1d4ed8;
     --accent2: #0284c7;
     --accent3: #6366f1;
+    --accent-tint: #eff6ff;
+    --accent-tint-border: #bfdbfe;
+    --nav-bg: rgba(255,255,255,0.96);
     --text: #0f172a;
     --text2: #475569;
     --text3: #94a3b8;
@@ -47,7 +50,7 @@
     height: 56px;
     border-bottom: 1px solid var(--border);
     position: sticky; top: 0;
-    background: rgba(255,255,255,0.96);
+    background: var(--nav-bg);
     backdrop-filter: blur(8px);
     z-index: 100;
   }
@@ -68,7 +71,7 @@
     color: var(--text3); transition: all 0.15s;
   }
   .nav-tab:hover { color: var(--text2); background: var(--surface2); }
-  .nav-tab.active { color: var(--accent); background: #eff6ff; }
+  .nav-tab.active { color: var(--accent); background: var(--accent-tint); }
 
   .stat-pill {
     font-family: 'DM Mono', monospace; font-size: 11px;
@@ -168,7 +171,7 @@
     font-family: 'DM Mono', monospace; font-size: 10px;
     color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em;
     margin-left: 8px;
-    background: #eff6ff; padding: 2px 6px; border-radius: 4px;
+    background: var(--accent-tint); padding: 2px 6px; border-radius: 4px;
   }
   .word-card-def {
     font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5;
@@ -248,7 +251,7 @@
     font-family: 'DM Mono', monospace; font-size: 10px;
     color: var(--accent); text-transform: uppercase;
     letter-spacing: 0.1em; margin-top: 10px;
-    background: #eff6ff; padding: 3px 8px; border-radius: 4px;
+    background: var(--accent-tint); padding: 3px 8px; border-radius: 4px;
   }
   .fc-def {
     font-size: 15px; color: var(--text2);
@@ -269,7 +272,7 @@
   }
   .fc-rate-again { background: #fef2f2; color: var(--danger); border: 1px solid #fca5a5; }
   .fc-rate-again:hover { background: var(--danger); color: white; }
-  .fc-rate-good { background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe; }
+  .fc-rate-good { background: var(--accent-tint); color: var(--accent); border: 1px solid var(--accent-tint-border); }
   .fc-rate-good:hover { background: var(--accent); color: white; }
   .fc-rate-easy { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
   .fc-rate-easy:hover { background: #16a34a; color: white; }
@@ -404,6 +407,13 @@
     <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="saveToFile()">Save</button>
     <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="document.getElementById('import-file-input').click()">Import</button>
     <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="loadFromFile(event)">
+    <div style="position:relative;">
+      <button class="btn btn-ghost" id="theme-btn" style="padding:5px 10px;font-size:14px;" onclick="toggleThemePicker()" title="换肤">🎨</button>
+      <div id="theme-picker" style="display:none;position:absolute;right:0;top:36px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:200;width:180px;">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.08em;">THEME</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;" id="theme-swatches"></div>
+      </div>
+    </div>
     <div class="stat-pill" id="nav-count"></div>
   </div>
 </nav>
@@ -665,6 +675,79 @@ function loadFromFile(event) {
   reader.readAsText(file);
   event.target.value = '';
 }
+
+// ─── THEMES ───────────────────────────────────────────────────────────────────
+const THEME_STORAGE = 'lexicon_theme';
+const THEMES = {
+  blue:    { label:'Blue',    swatch:'#2563eb', accent:'#2563eb', hover:'#1d4ed8', accent2:'#0284c7', accent3:'#6366f1', tint:'#eff6ff', tintBorder:'#bfdbfe' },
+  violet:  { label:'Violet',  swatch:'#7c3aed', accent:'#7c3aed', hover:'#6d28d9', accent2:'#8b5cf6', accent3:'#a855f7', tint:'#f5f3ff', tintBorder:'#ddd6fe' },
+  rose:    { label:'Rose',    swatch:'#e11d48', accent:'#e11d48', hover:'#be123c', accent2:'#f43f5e', accent3:'#ec4899', tint:'#fff1f2', tintBorder:'#fecdd3' },
+  emerald: { label:'Green',   swatch:'#059669', accent:'#059669', hover:'#047857', accent2:'#10b981', accent3:'#34d399', tint:'#ecfdf5', tintBorder:'#a7f3d0' },
+  amber:   { label:'Amber',   swatch:'#d97706', accent:'#b45309', hover:'#92400e', accent2:'#d97706', accent3:'#f59e0b', tint:'#fffbeb', tintBorder:'#fde68a' },
+  dark:    { label:'Dark',    swatch:'#1e293b', accent:'#60a5fa', hover:'#93c5fd', accent2:'#38bdf8', accent3:'#818cf8', tint:'#1e3a5f', tintBorder:'#1e40af',
+             bg:'#0f172a', surface:'#1e293b', surface2:'#334155', surface3:'#475569',
+             border:'#334155', text:'#f1f5f9', text2:'#cbd5e1', text3:'#64748b',
+             navBg:'rgba(15,23,42,0.96)' },
+};
+
+function applyTheme(id) {
+  const t = THEMES[id] || THEMES.blue;
+  const r = document.documentElement.style;
+  r.setProperty('--accent', t.accent);
+  r.setProperty('--accent-hover', t.hover);
+  r.setProperty('--accent2', t.accent2);
+  r.setProperty('--accent3', t.accent3);
+  r.setProperty('--accent-tint', t.tint);
+  r.setProperty('--accent-tint-border', t.tintBorder);
+  r.setProperty('--bg',       t.bg       || '#ffffff');
+  r.setProperty('--surface',  t.surface  || '#f8fafc');
+  r.setProperty('--surface2', t.surface2 || '#f1f5f9');
+  r.setProperty('--surface3', t.surface3 || '#e2e8f0');
+  r.setProperty('--border',   t.border   || '#e2e8f0');
+  r.setProperty('--text',     t.text     || '#0f172a');
+  r.setProperty('--text2',    t.text2    || '#475569');
+  r.setProperty('--text3',    t.text3    || '#94a3b8');
+  r.setProperty('--nav-bg',   t.navBg    || 'rgba(255,255,255,0.96)');
+  // update active swatch ring
+  document.querySelectorAll('.theme-swatch-btn').forEach(el => {
+    el.style.outline = el.dataset.theme === id ? '2px solid var(--accent)' : 'none';
+    el.style.outlineOffset = '2px';
+  });
+  localStorage.setItem(THEME_STORAGE, id);
+}
+
+function buildThemeSwatches() {
+  const cur = localStorage.getItem(THEME_STORAGE) || 'blue';
+  const container = document.getElementById('theme-swatches');
+  container.innerHTML = '';
+  Object.entries(THEMES).forEach(([id, t]) => {
+    const btn = document.createElement('button');
+    btn.className = 'theme-swatch-btn';
+    btn.dataset.theme = id;
+    btn.title = t.label;
+    btn.style.cssText = `width:100%;aspect-ratio:1;border-radius:8px;border:none;cursor:pointer;background:${t.swatch};transition:transform 0.1s;outline:${id===cur?'2px solid '+t.accent:'none'};outline-offset:2px;`;
+    btn.onmouseenter = () => { btn.style.transform = 'scale(1.1)'; };
+    btn.onmouseleave = () => { btn.style.transform = ''; };
+    btn.onclick = () => { applyTheme(id); };
+    container.appendChild(btn);
+  });
+}
+
+function toggleThemePicker() {
+  const picker = document.getElementById('theme-picker');
+  const open = picker.style.display !== 'none';
+  picker.style.display = open ? 'none' : 'block';
+  if (!open) buildThemeSwatches();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#theme-btn') && !e.target.closest('#theme-picker')) {
+    document.getElementById('theme-picker').style.display = 'none';
+  }
+});
+
+// apply saved theme on load
+applyTheme(localStorage.getItem(THEME_STORAGE) || 'blue');
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
