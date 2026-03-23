@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lexicon — Advanced Vocabulary Studio</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lexicon">
+<link rel="apple-touch-icon" href="icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -396,6 +402,8 @@
   <div style="display:flex;align-items:center;gap:12px;">
     <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="openSettings()">⚙ API Key</button>
     <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="saveToFile()">Save</button>
+    <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="document.getElementById('import-file-input').click()">Import</button>
+    <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="loadFromFile(event)">
     <div class="stat-pill" id="nav-count"></div>
   </div>
 </nav>
@@ -633,6 +641,33 @@ function saveToFile() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+function loadFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if (!Array.isArray(payload.words)) throw new Error('格式不正确');
+      if (!confirm(`即将导入 ${payload.words.length} 个单词，将覆盖当前数据，确认吗？`)) return;
+      words = payload.words;
+      sessionLog = Array.isArray(payload.sessionLog) ? payload.sessionLog : [];
+      saveData();
+      renderWords();
+      renderStats();
+      alert('导入成功！');
+    } catch(err) {
+      alert('导入失败：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 // ─── AI AUTOFILL ──────────────────────────────────────────────────────────────
