@@ -73,6 +73,14 @@
   .nav-tab:hover { color: var(--text2); background: var(--surface2); }
   .nav-tab.active { color: var(--accent); background: var(--accent-tint); }
 
+  .nav-mobile-only { display: none; }
+  @media (max-width: 640px) {
+    nav { padding: 0 14px; }
+    .nav-desktop-only { display: none !important; }
+    .nav-mobile-only { display: block; }
+    .logo span { display: none; }
+  }
+
   .stat-pill {
     font-family: 'DM Mono', monospace; font-size: 11px;
     color: var(--text3); letter-spacing: 0.06em;
@@ -402,11 +410,22 @@
     <button class="nav-tab" onclick="showView('flashcards')">Study</button>
     <button class="nav-tab" onclick="showView('stats')">Progress</button>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;">
-    <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="openSettings()">⚙ API Key</button>
-    <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="saveToFile()">Save</button>
-    <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="document.getElementById('import-file-input').click()">Import</button>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <!-- desktop buttons -->
+    <button class="btn btn-ghost nav-desktop-only" style="padding:5px 12px;font-size:12px;" onclick="openSettings()">⚙ API Key</button>
+    <button class="btn btn-ghost nav-desktop-only" style="padding:5px 12px;font-size:12px;" onclick="saveToFile()">Save</button>
+    <button class="btn btn-ghost nav-desktop-only" style="padding:5px 12px;font-size:12px;" onclick="document.getElementById('import-file-input').click()">Import</button>
     <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="loadFromFile(event)">
+    <!-- mobile ⋯ menu -->
+    <div style="position:relative;" class="nav-mobile-only">
+      <button class="btn btn-ghost" id="more-btn" style="padding:5px 10px;font-size:16px;line-height:1;" onclick="toggleMoreMenu()" title="更多">⋯</button>
+      <div id="more-menu" style="display:none;position:absolute;right:0;top:36px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:200;min-width:130px;">
+        <button class="btn btn-ghost" style="width:100%;text-align:left;padding:8px 12px;font-size:13px;" onclick="openSettings();toggleMoreMenu()">⚙ API Key</button>
+        <button class="btn btn-ghost" style="width:100%;text-align:left;padding:8px 12px;font-size:13px;" onclick="saveToFile();toggleMoreMenu()">↓ Save</button>
+        <button class="btn btn-ghost" style="width:100%;text-align:left;padding:8px 12px;font-size:13px;" onclick="document.getElementById('import-file-input').click();toggleMoreMenu()">↑ Import</button>
+      </div>
+    </div>
+    <!-- theme picker (always visible) -->
     <div style="position:relative;">
       <button class="btn btn-ghost" id="theme-btn" style="padding:5px 10px;font-size:14px;" onclick="toggleThemePicker()" title="换肤">🎨</button>
       <div id="theme-picker" style="display:none;position:absolute;right:0;top:36px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:200;width:180px;">
@@ -733,6 +752,11 @@ function buildThemeSwatches() {
   });
 }
 
+function toggleMoreMenu() {
+  const menu = document.getElementById('more-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
 function toggleThemePicker() {
   const picker = document.getElementById('theme-picker');
   const open = picker.style.display !== 'none';
@@ -741,9 +765,10 @@ function toggleThemePicker() {
 }
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('#theme-btn') && !e.target.closest('#theme-picker')) {
+  if (!e.target.closest('#theme-btn') && !e.target.closest('#theme-picker'))
     document.getElementById('theme-picker').style.display = 'none';
-  }
+  if (!e.target.closest('#more-btn') && !e.target.closest('#more-menu'))
+    document.getElementById('more-menu').style.display = 'none';
 });
 
 // apply saved theme on load
