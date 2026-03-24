@@ -480,6 +480,7 @@
         <input type="text" id="inp-pron" placeholder="例：[ɪˈfemərəl] 或 ee-FEM-uh-rul">
       </div>
     </div>
+    <button class="btn btn-primary" id="btn-ai-fill" onclick="aiFill()" style="width:100%;margin-bottom:14px;">✦ Auto-fill with AI</button>
     <div style="margin-bottom:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <label style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:var(--text2);">Definitions</label>
@@ -496,9 +497,8 @@
         <button class="btn btn-ghost" id="btn-cn-to-en" onclick="aiChineseToEnglish()" style="white-space:nowrap;flex-shrink:0;height:38px;">中 → EN</button>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
       <button class="btn btn-ghost" id="btn-related" onclick="aiRelatedWords()">Related Words</button>
-      <button class="btn btn-ghost" id="btn-ai-fill" onclick="aiFill()">Auto-fill with AI</button>
       <button class="btn btn-primary" onclick="addWord()">Add to Library</button>
     </div>
   </div>
