@@ -401,6 +401,15 @@
     .fc-face { padding: 22px 20px; }
   }
 
+  /* MULTI-DEF ENTRY FORM */
+  .def-entry { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; background: var(--surface); }
+  .def-entry-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .def-entry-header select { flex: 0 0 130px; }
+  .def-entry textarea { width: 100%; resize: vertical; min-height: 60px; margin-bottom: 6px; }
+  .def-entry input[type=text] { width: 100%; }
+  .def-remove { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 4px; }
+  .def-remove:hover { color: var(--danger); background: #fef2f2; }
+
   /* RELATED WORDS MODAL */
   .related-list { display: flex; flex-direction: column; gap: 10px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
   .related-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color 0.15s; }
@@ -471,25 +480,12 @@
         <input type="text" id="inp-pron" placeholder="例：[ɪˈfemərəl] 或 ee-FEM-uh-rul">
       </div>
     </div>
-    <div class="form-row">
-      <div>
-        <label>Part of Speech</label>
-        <select id="inp-pos">
-          <option value="">—</option>
-          <option>adjective</option>
-          <option>noun</option>
-          <option>verb</option>
-          <option>adverb</option>
-          <option>phrase</option>
-        </select>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <label style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:var(--text2);">Definitions</label>
+        <button class="btn btn-ghost" onclick="addDefEntry()" style="padding:3px 10px;font-size:12px;">+ Add POS</button>
       </div>
-      <div></div>
-    </div>
-    <div class="form-row full">
-      <div>
-        <label>Definition</label>
-        <textarea id="inp-def" placeholder="Lasting for a very short time; transitory."></textarea>
-      </div>
+      <div id="def-entries"></div>
     </div>
     <div class="form-row full">
       <div style="display:flex;gap:8px;align-items:flex-end;">
@@ -498,12 +494,6 @@
           <input type="text" id="inp-zh" placeholder="例：短暫的；轉瞬即逝的（或輸入中文查英文）">
         </div>
         <button class="btn btn-ghost" id="btn-cn-to-en" onclick="aiChineseToEnglish()" style="white-space:nowrap;flex-shrink:0;height:38px;">中 → EN</button>
-      </div>
-    </div>
-    <div class="form-row full">
-      <div>
-        <label>Example Sentence</label>
-        <input type="text" id="inp-ex" placeholder="Her fame was ephemeral, lasting only a single season.">
       </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap;">
@@ -825,8 +815,70 @@ const PROVIDER_STORAGE = 'lexicon_ai_provider';
 
 let aiFillInFlight = false;
 let aiFillLastAt = 0;
-let pendingDefinitions = null; // multi-POS definitions from AI fill
 let relatedCandidates = [];
+let defEntryCounter = 0;
+
+const POS_OPTIONS = ['adjective','noun','verb','adverb','phrase'];
+
+function makeDefEntryHTML(idx, pos='', def='', ex='') {
+  const opts = POS_OPTIONS.map(p => `<option value="${p}" ${p===pos?'selected':''}>${p}</option>`).join('');
+  return `<div class="def-entry" id="def-entry-${idx}">
+    <div class="def-entry-header">
+      <select id="def-pos-${idx}">
+        <option value="">— POS —</option>${opts}
+      </select>
+      <button class="def-remove" onclick="removeDefEntry(${idx})" title="Remove">✕</button>
+    </div>
+    <textarea id="def-def-${idx}" placeholder="Definition…">${def}</textarea>
+    <input type="text" id="def-ex-${idx}" placeholder="Example sentence…" value="${ex}">
+  </div>`;
+}
+
+function addDefEntry(pos='', def='', ex='') {
+  const idx = ++defEntryCounter;
+  document.getElementById('def-entries').insertAdjacentHTML('beforeend', makeDefEntryHTML(idx, pos, def, ex));
+  updateRemoveButtons();
+}
+
+function removeDefEntry(idx) {
+  const el = document.getElementById('def-entry-' + idx);
+  if (el) el.remove();
+  updateRemoveButtons();
+}
+
+function updateRemoveButtons() {
+  const entries = document.querySelectorAll('#def-entries .def-entry');
+  entries.forEach(e => {
+    const btn = e.querySelector('.def-remove');
+    if (btn) btn.style.visibility = entries.length > 1 ? 'visible' : 'hidden';
+  });
+}
+
+function getDefEntries() {
+  const entries = document.querySelectorAll('#def-entries .def-entry');
+  const result = [];
+  entries.forEach(e => {
+    const idx = e.id.replace('def-entry-', '');
+    const pos = document.getElementById('def-pos-' + idx)?.value || '';
+    const def = document.getElementById('def-def-' + idx)?.value.trim() || '';
+    const ex  = document.getElementById('def-ex-' + idx)?.value.trim() || '';
+    if (def) result.push({ pos, definition: def, example: ex });
+  });
+  return result;
+}
+
+function setDefEntries(arr) {
+  document.getElementById('def-entries').innerHTML = '';
+  defEntryCounter = 0;
+  if (!arr || arr.length === 0) { addDefEntry(); return; }
+  arr.forEach(d => addDefEntry(d.pos || '', d.definition_en || d.definition || '', d.example || ''));
+}
+
+function initDefEntries() {
+  document.getElementById('def-entries').innerHTML = '';
+  defEntryCounter = 0;
+  addDefEntry();
+}
 
 function getProvider() {
   return localStorage.getItem(PROVIDER_STORAGE) || 'gemini';
@@ -890,19 +942,15 @@ async function callAI(prompt, maxTokens = 500) {
 
 async function aiFill() {
   const word = document.getElementById('inp-word')?.value?.trim() || '';
-  const pos = document.getElementById('inp-pos')?.value || '';
   if (!word) { alert('请先输入 Word。'); return; }
-
   const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
   if (!apiKey) { openSettings(); return; }
-
   const now = Date.now();
   if (aiFillInFlight) return;
   if (now - aiFillLastAt < 2000) return;
   aiFillLastAt = now;
   aiFillInFlight = true;
   setAiBtnState(true);
-
   try {
     const prompt = [
       'You are helping a learner build an IELTS vocabulary notebook.',
@@ -916,29 +964,17 @@ async function aiFill() {
       '    pos: exactly one of: adjective, noun, verb, adverb, phrase',
       '    definition_en: one sentence, learner-friendly, IELTS-appropriate',
       '    example: one natural IELTS-style sentence',
-      pos ? `User specified pos "${pos}": return only this one pos entry.` : '',
       `Word: ${word}`,
-    ].filter(Boolean).join('\n');
-
-    const text = await callAI(prompt, 600);
+    ].join('\n');
+    const text = await callAI(prompt, 700);
     const obj = extractJsonObject(text);
     if (!obj) throw new Error('无法解析 AI 返回的内容');
-
     const pronunciation = aiNormalizePronunciation((obj.pronunciation || '').toString().trim());
     const chinese_zh = (obj.chinese_zh || '').toString().trim();
-    const definitions = Array.isArray(obj.definitions) ? obj.definitions : null;
-    const validPos = ['adjective', 'noun', 'verb', 'adverb', 'phrase'];
-
     if (pronunciation) document.getElementById('inp-pron').value = pronunciation;
     if (chinese_zh) document.getElementById('inp-zh').value = chinese_zh;
-
-    if (definitions && definitions.length > 0) {
-      const first = definitions[0];
-      const firstPos = (first.pos || '').toString().trim().toLowerCase();
-      if (firstPos && validPos.includes(firstPos) && !pos) document.getElementById('inp-pos').value = firstPos;
-      if (first.definition_en) document.getElementById('inp-def').value = first.definition_en.trim();
-      if (first.example) document.getElementById('inp-ex').value = first.example.trim();
-      pendingDefinitions = definitions.map(d => ({ pos: (d.pos||'').trim(), definition: (d.definition_en||'').trim(), example: (d.example||'').trim() }));
+    if (Array.isArray(obj.definitions) && obj.definitions.length > 0) {
+      setDefEntries(obj.definitions);
     }
   } catch (e) {
     alert('AI 自动生成失败。\n\n错误信息：' + (e?.message || String(e)));
@@ -1036,21 +1072,14 @@ async function aiChineseToEnglish() {
       '- chinese_zh: 简体中文，覆盖主要词性',
       '- definitions: 1-3 entries; pos must be one of: adjective, noun, verb, adverb, phrase',
     ].join('\n');
-    const text = await callAI(prompt, 600);
+    const text = await callAI(prompt, 700);
     const obj = extractJsonObject(text);
     if (!obj || !obj.word) throw new Error('无法解析返回内容');
     document.getElementById('inp-word').value = obj.word;
     if (obj.pronunciation) document.getElementById('inp-pron').value = aiNormalizePronunciation(obj.pronunciation);
     if (obj.chinese_zh) document.getElementById('inp-zh').value = obj.chinese_zh;
-    const definitions = Array.isArray(obj.definitions) ? obj.definitions : null;
-    const validPos = ['adjective', 'noun', 'verb', 'adverb', 'phrase'];
-    if (definitions && definitions.length > 0) {
-      const first = definitions[0];
-      const firstPos = (first.pos || '').toLowerCase();
-      if (firstPos && validPos.includes(firstPos)) document.getElementById('inp-pos').value = firstPos;
-      if (first.definition_en) document.getElementById('inp-def').value = first.definition_en.trim();
-      if (first.example) document.getElementById('inp-ex').value = first.example.trim();
-      pendingDefinitions = definitions.map(d => ({ pos: (d.pos||'').trim(), definition: (d.definition_en||'').trim(), example: (d.example||'').trim() }));
+    if (Array.isArray(obj.definitions) && obj.definitions.length > 0) {
+      setDefEntries(obj.definitions);
     }
   } catch (e) {
     alert('中译英失败：' + (e?.message || String(e)));
@@ -1283,23 +1312,23 @@ function updateNavCount() {
 // ─── WORD MANAGER ─────────────────────────────────────────────────────────────
 function addWord() {
   const word = document.getElementById('inp-word').value.trim();
-  const def  = document.getElementById('inp-def').value.trim();
-  if (!word || !def) { alert('Word and definition are required.'); return; }
-  const pos  = document.getElementById('inp-pos').value;
-  const ex   = document.getElementById('inp-ex').value.trim();
+  if (!word) { alert('Word is required.'); return; }
+  const defs = getDefEntries();
+  if (defs.length === 0) { alert('Please add at least one definition.'); return; }
   const chinese = document.getElementById('inp-zh').value.trim();
   const pronunciation = document.getElementById('inp-pron').value.trim();
-  const wordObj = { id: uid(), word, pos, pronunciation, definition: def, chinese, example: ex, mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine' };
-  if (pendingDefinitions && pendingDefinitions.length > 1) wordObj.definitions = pendingDefinitions;
-  pendingDefinitions = null;
+  const wordObj = {
+    id: uid(), word, pronunciation,
+    pos: defs[0].pos, definition: defs[0].definition, example: defs[0].example,
+    chinese, mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine'
+  };
+  if (defs.length > 1) wordObj.definitions = defs;
   words.unshift(wordObj);
   saveData();
   document.getElementById('inp-word').value = '';
   document.getElementById('inp-pron').value = '';
-  document.getElementById('inp-def').value = '';
   document.getElementById('inp-zh').value = '';
-  document.getElementById('inp-pos').value = '';
-  document.getElementById('inp-ex').value = '';
+  initDefEntries();
   renderWordList();
   updateNavCount();
 }
@@ -1559,6 +1588,7 @@ function renderStats() {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
+initDefEntries();
 renderWordList();
 updateNavCount();
 </script>
