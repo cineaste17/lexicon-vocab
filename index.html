@@ -400,6 +400,20 @@
     .fc-card { height: 210px; }
     .fc-face { padding: 22px 20px; }
   }
+
+  /* RELATED WORDS MODAL */
+  .related-list { display: flex; flex-direction: column; gap: 10px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+  .related-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color 0.15s; }
+  .related-item:hover { border-color: var(--accent); }
+  .related-item input[type=checkbox] { margin-top: 3px; accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+  .related-item-word { font-weight: 600; color: var(--text); font-size: 15px; }
+  .related-item-pos { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-left: 6px; }
+  .related-item-zh { font-size: 13px; color: var(--accent); font-weight: 500; margin-top: 2px; }
+  .related-item-def { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+  /* MULTI-POS DISPLAY */
+  .multi-def-row { font-size: 13px; color: var(--text2); display: flex; gap: 6px; align-items: baseline; margin-top: 4px; }
+  .multi-def-pos { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text3); background: var(--surface2); border-radius: 4px; padding: 1px 5px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -478,9 +492,12 @@
       </div>
     </div>
     <div class="form-row full">
-      <div>
-        <label>中文翻譯 Chinese Translation</label>
-        <input type="text" id="inp-zh" placeholder="例：短暫的；轉瞬即逝的">
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <div style="flex:1;">
+          <label>中文翻譯 Chinese Translation</label>
+          <input type="text" id="inp-zh" placeholder="例：短暫的；轉瞬即逝的（或輸入中文查英文）">
+        </div>
+        <button class="btn btn-ghost" id="btn-cn-to-en" onclick="aiChineseToEnglish()" style="white-space:nowrap;flex-shrink:0;height:38px;">中 → EN</button>
       </div>
     </div>
     <div class="form-row full">
@@ -489,7 +506,8 @@
         <input type="text" id="inp-ex" placeholder="Her fame was ephemeral, lasting only a single season.">
       </div>
     </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" id="btn-related" onclick="aiRelatedWords()">Related Words</button>
       <button class="btn btn-ghost" id="btn-ai-fill" onclick="aiFill()">Auto-fill with AI</button>
       <button class="btn btn-primary" onclick="addWord()">Add to Library</button>
     </div>
@@ -557,6 +575,19 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
       <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Related Words Modal -->
+<div class="modal-overlay" id="related-modal">
+  <div class="modal" style="max-width:580px;width:90%;">
+    <h3>Related Words</h3>
+    <p id="related-modal-sub" style="font-size:13px;color:var(--text3);margin-bottom:16px;"></p>
+    <div class="related-list" id="related-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeRelatedModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addRelatedWords()">Add Selected</button>
     </div>
   </div>
 </div>
@@ -794,6 +825,8 @@ const PROVIDER_STORAGE = 'lexicon_ai_provider';
 
 let aiFillInFlight = false;
 let aiFillLastAt = 0;
+let pendingDefinitions = null; // multi-POS definitions from AI fill
+let relatedCandidates = [];
 
 function getProvider() {
   return localStorage.getItem(PROVIDER_STORAGE) || 'gemini';
@@ -829,13 +862,38 @@ function extractJsonObject(text) {
   try { return JSON.parse(text.slice(first, last + 1)); } catch { return null; }
 }
 
+async function callAI(prompt, maxTokens = 500) {
+  const provider = getProvider();
+  const apiKey = provider === 'deepseek' ? getDeepSeekKey() : getApiKey();
+  if (!apiKey) throw new Error('API Key not set');
+  if (provider === 'deepseek') {
+    const r = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.2, max_tokens: maxTokens })
+    });
+    const data = await r.json().catch(() => null);
+    if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
+    return data?.choices?.[0]?.message?.content || '';
+  } else {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: maxTokens, responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } } })
+    });
+    const data = await r.json().catch(() => null);
+    if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
+    return data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('\n') || '';
+  }
+}
+
 async function aiFill() {
   const word = document.getElementById('inp-word')?.value?.trim() || '';
   const pos = document.getElementById('inp-pos')?.value || '';
   if (!word) { alert('请先输入 Word。'); return; }
 
-  const provider = getProvider();
-  const apiKey = provider === 'deepseek' ? getDeepSeekKey() : getApiKey();
+  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
   if (!apiKey) { openSettings(); return; }
 
   const now = Date.now();
@@ -848,83 +906,156 @@ async function aiFill() {
   try {
     const prompt = [
       'You are helping a learner build an IELTS vocabulary notebook.',
-      'Generate concise, accurate fields for the given English word.',
+      'Generate fields for the given English word.',
       'Return ONLY valid JSON (no markdown, no extra text).',
-      'JSON schema:',
-      '{',
-      '  "pronunciation": string,',
-      '  "pos": string,',
-      '  "definition_en": string,',
-      '  "chinese_zh": string,',
-      '  "example": string',
-      '}',
+      'JSON schema: { "pronunciation": string, "chinese_zh": string, "definitions": [{"pos": string, "definition_en": string, "example": string}] }',
       'Rules:',
-      '- pronunciation: IPA if possible, otherwise simple syllable hint; no surrounding slashes.',
-      '- pos: the primary part of speech; must be exactly one of: adjective, noun, verb, adverb, phrase.',
-      '- definition_en: one sentence, learner-friendly, IELTS-appropriate.',
-      '- chinese_zh: 简体中文释义，尽量精炼。',
-      '- example: one natural sentence using the word (IELTS style).',
-      '',
+      '- pronunciation: IPA if possible; no surrounding slashes.',
+      '- chinese_zh: 简体中文，覆盖该词所有常用词性，精炼。',
+      '- definitions: include ALL common parts of speech (1-3 entries).',
+      '    pos: exactly one of: adjective, noun, verb, adverb, phrase',
+      '    definition_en: one sentence, learner-friendly, IELTS-appropriate',
+      '    example: one natural IELTS-style sentence',
+      pos ? `User specified pos "${pos}": return only this one pos entry.` : '',
       `Word: ${word}`,
-      pos ? `User-specified part of speech (use this if provided): ${pos}` : ''
     ].filter(Boolean).join('\n');
 
-    let text = '';
-
-    if (provider === 'deepseek') {
-      const r = await fetch('https://api.deepseek.com/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.2,
-          max_tokens: 320
-        })
-      });
-      const data = await r.json().catch(() => null);
-      if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
-      text = data?.choices?.[0]?.message?.content || '';
-    } else {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 320,
-            responseMimeType: 'application/json',
-            thinkingConfig: { thinkingBudget: 0 }
-          }
-        })
-      });
-      const data = await r.json().catch(() => null);
-      if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
-      text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('\n') || '';
-    }
-
+    const text = await callAI(prompt, 600);
     const obj = extractJsonObject(text);
     if (!obj) throw new Error('无法解析 AI 返回的内容');
 
     const pronunciation = aiNormalizePronunciation((obj.pronunciation || '').toString().trim());
-    const aiPos = (obj.pos || '').toString().trim().toLowerCase();
-    const definition_en = (obj.definition_en || '').toString().trim();
     const chinese_zh = (obj.chinese_zh || '').toString().trim();
-    const example = (obj.example || '').toString().trim();
-
+    const definitions = Array.isArray(obj.definitions) ? obj.definitions : null;
     const validPos = ['adjective', 'noun', 'verb', 'adverb', 'phrase'];
+
     if (pronunciation) document.getElementById('inp-pron').value = pronunciation;
-    if (aiPos && validPos.includes(aiPos) && !pos) document.getElementById('inp-pos').value = aiPos;
-    if (definition_en) document.getElementById('inp-def').value = definition_en;
     if (chinese_zh) document.getElementById('inp-zh').value = chinese_zh;
-    if (example) document.getElementById('inp-ex').value = example;
+
+    if (definitions && definitions.length > 0) {
+      const first = definitions[0];
+      const firstPos = (first.pos || '').toString().trim().toLowerCase();
+      if (firstPos && validPos.includes(firstPos) && !pos) document.getElementById('inp-pos').value = firstPos;
+      if (first.definition_en) document.getElementById('inp-def').value = first.definition_en.trim();
+      if (first.example) document.getElementById('inp-ex').value = first.example.trim();
+      pendingDefinitions = definitions.map(d => ({ pos: (d.pos||'').trim(), definition: (d.definition_en||'').trim(), example: (d.example||'').trim() }));
+    }
   } catch (e) {
     alert('AI 自动生成失败。\n\n错误信息：' + (e?.message || String(e)));
   } finally {
     aiFillInFlight = false;
     setAiBtnState(false);
+  }
+}
+
+async function aiRelatedWords() {
+  const word = document.getElementById('inp-word')?.value?.trim() || '';
+  if (!word) { alert('请先输入 Word。'); return; }
+  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
+  if (!apiKey) { openSettings(); return; }
+
+  const btn = document.getElementById('btn-related');
+  btn.disabled = true; btn.textContent = 'Loading…';
+  try {
+    const prompt = [
+      'You are helping a learner build an IELTS vocabulary notebook.',
+      `Generate 5 words closely related to "${word}" (synonyms, derivatives, collocations, or thematically linked words).`,
+      'Return ONLY a valid JSON array (no markdown, no extra text).',
+      'Schema: [{"word":string,"pos":string,"definition_en":string,"chinese_zh":string,"example":string}]',
+      'Rules:',
+      '- pos: exactly one of: adjective, noun, verb, adverb, phrase',
+      '- definition_en: one sentence, learner-friendly, IELTS-appropriate',
+      '- chinese_zh: 简体中文释义，精炼',
+      '- example: one natural IELTS-style sentence',
+      '- do NOT include the source word itself',
+    ].join('\n');
+    const text = await callAI(prompt, 900);
+    const first = text.indexOf('['), last = text.lastIndexOf(']');
+    if (first === -1 || last === -1) throw new Error('无法解析返回内容');
+    const arr = JSON.parse(text.slice(first, last + 1));
+    if (!Array.isArray(arr) || arr.length === 0) throw new Error('返回内容为空');
+    relatedCandidates = arr;
+    document.getElementById('related-modal-sub').textContent = `Words related to "${word}" — select to add to your library.`;
+    document.getElementById('related-list').innerHTML = arr.map((w, i) => `
+      <label class="related-item">
+        <input type="checkbox" checked data-idx="${i}">
+        <div class="related-item-body">
+          <div><span class="related-item-word">${w.word}</span><span class="related-item-pos">${w.pos}</span></div>
+          ${w.chinese_zh ? `<div class="related-item-zh">${w.chinese_zh}</div>` : ''}
+          <div class="related-item-def">${w.definition_en}</div>
+        </div>
+      </label>
+    `).join('');
+    document.getElementById('related-modal').classList.add('open');
+  } catch (e) {
+    alert('AI 生成失败：' + (e?.message || String(e)));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Related Words';
+  }
+}
+
+function closeRelatedModal() { document.getElementById('related-modal').classList.remove('open'); }
+
+function addRelatedWords() {
+  const checkboxes = document.querySelectorAll('#related-list input[type=checkbox]');
+  let added = 0;
+  checkboxes.forEach(cb => {
+    if (!cb.checked) return;
+    const r = relatedCandidates[parseInt(cb.dataset.idx)];
+    if (!r) return;
+    words.unshift({ id: uid(), word: r.word, pos: r.pos||'', pronunciation: '', definition: r.definition_en||'', chinese: r.chinese_zh||'', example: r.example||'', mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine' });
+    added++;
+  });
+  closeRelatedModal();
+  if (added > 0) {
+    saveData(); renderWordList(); updateNavCount();
+    const btn = document.getElementById('btn-related');
+    btn.textContent = `Added ${added}!`;
+    setTimeout(() => btn.textContent = 'Related Words', 2000);
+  }
+}
+
+async function aiChineseToEnglish() {
+  const zh = document.getElementById('inp-zh')?.value?.trim() || '';
+  if (!zh) { alert('请先在中文翻译栏输入中文词语。'); return; }
+  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
+  if (!apiKey) { openSettings(); return; }
+
+  const btn = document.getElementById('btn-cn-to-en');
+  btn.disabled = true; btn.textContent = 'Searching…';
+  try {
+    const prompt = [
+      'You are helping a learner build an IELTS vocabulary notebook.',
+      `Given this Chinese word or phrase: "${zh}"`,
+      'Find the best English equivalent (single word preferred, IELTS-appropriate).',
+      'Return ONLY valid JSON (no markdown, no extra text).',
+      'JSON schema: { "word": string, "pronunciation": string, "chinese_zh": string, "definitions": [{"pos": string, "definition_en": string, "example": string}] }',
+      'Rules:',
+      '- word: the English word or phrase',
+      '- pronunciation: IPA, no surrounding slashes',
+      '- chinese_zh: 简体中文，覆盖主要词性',
+      '- definitions: 1-3 entries; pos must be one of: adjective, noun, verb, adverb, phrase',
+    ].join('\n');
+    const text = await callAI(prompt, 600);
+    const obj = extractJsonObject(text);
+    if (!obj || !obj.word) throw new Error('无法解析返回内容');
+    document.getElementById('inp-word').value = obj.word;
+    if (obj.pronunciation) document.getElementById('inp-pron').value = aiNormalizePronunciation(obj.pronunciation);
+    if (obj.chinese_zh) document.getElementById('inp-zh').value = obj.chinese_zh;
+    const definitions = Array.isArray(obj.definitions) ? obj.definitions : null;
+    const validPos = ['adjective', 'noun', 'verb', 'adverb', 'phrase'];
+    if (definitions && definitions.length > 0) {
+      const first = definitions[0];
+      const firstPos = (first.pos || '').toLowerCase();
+      if (firstPos && validPos.includes(firstPos)) document.getElementById('inp-pos').value = firstPos;
+      if (first.definition_en) document.getElementById('inp-def').value = first.definition_en.trim();
+      if (first.example) document.getElementById('inp-ex').value = first.example.trim();
+      pendingDefinitions = definitions.map(d => ({ pos: (d.pos||'').trim(), definition: (d.definition_en||'').trim(), example: (d.example||'').trim() }));
+    }
+  } catch (e) {
+    alert('中译英失败：' + (e?.message || String(e)));
+  } finally {
+    btn.disabled = false; btn.textContent = '中 → EN';
   }
 }
 
@@ -1158,14 +1289,17 @@ function addWord() {
   const ex   = document.getElementById('inp-ex').value.trim();
   const chinese = document.getElementById('inp-zh').value.trim();
   const pronunciation = document.getElementById('inp-pron').value.trim();
-  // 使用者自己新增的單詞，統一標記為 My words
-  words.unshift({ id: uid(), word, pos, pronunciation, definition: def, chinese, example: ex, mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine' });
+  const wordObj = { id: uid(), word, pos, pronunciation, definition: def, chinese, example: ex, mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine' };
+  if (pendingDefinitions && pendingDefinitions.length > 1) wordObj.definitions = pendingDefinitions;
+  pendingDefinitions = null;
+  words.unshift(wordObj);
   saveData();
   document.getElementById('inp-word').value = '';
   document.getElementById('inp-pron').value = '';
   document.getElementById('inp-def').value = '';
   document.getElementById('inp-zh').value = '';
   document.getElementById('inp-pos').value = '';
+  document.getElementById('inp-ex').value = '';
   renderWordList();
   updateNavCount();
 }
@@ -1189,17 +1323,28 @@ function renderWordList() {
     return;
   }
 
-  list.innerHTML = filtered.map(w => `
+  list.innerHTML = filtered.map(w => {
+    const defs = (w.definitions && w.definitions.length > 1) ? w.definitions : null;
+    const defHtml = defs
+      ? defs.map(d => `<div class="multi-def-row"><span class="multi-def-pos">${d.pos}</span><span>${d.definition}</span></div>`).join('')
+      : `<div class="word-card-def">${w.definition}</div>`;
+    const exHtml = defs
+      ? (defs[0].example ? `<div class="word-card-example">${defs[0].example}</div>` : '')
+      : (w.example ? `<div class="word-card-example">${w.example}</div>` : '');
+    const posHtml = defs
+      ? defs.map(d => `<span class="word-card-pos">${d.pos}</span>`).join(' ')
+      : (w.pos ? `<span class="word-card-pos">${w.pos}</span>` : '');
+    return `
     <div class="word-card" id="wc-${w.id}">
       <div class="word-card-body">
-        <div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
           <span class="word-card-word">${w.word}</span>
-          ${w.pos ? `<span class="word-card-pos">${w.pos}</span>` : ''}
+          ${posHtml}
         </div>
         ${w.pronunciation ? `<div style="font-size:12px;color:var(--text3);margin-top:2px;">/${w.pronunciation}/</div>` : ''}
         ${w.chinese ? `<div style="font-size:13px;color:var(--accent);font-weight:500;margin-top:3px;letter-spacing:0.02em">${w.chinese}</div>` : ''}
-        <div class="word-card-def">${w.definition}</div>
-        ${w.example ? `<div class="word-card-example">${w.example}</div>` : ''}
+        ${defHtml}
+        ${exHtml}
       </div>
       <span class="mastery-badge m-${w.mastery}">${w.mastery}</span>
       ${w.tag ? `<span class="mastery-badge" style="background:#f0eefb;color:var(--accent3);border:1px solid #cdc8ef">${w.tag}</span>` : ''}
@@ -1207,8 +1352,8 @@ function renderWordList() {
         <button class="icon-btn" onclick="openEdit('${w.id}')" title="Edit">✎</button>
         <button class="icon-btn del" onclick="deleteWord('${w.id}')" title="Delete">✕</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function deleteWord(id) {
@@ -1246,6 +1391,9 @@ function saveEdit() {
 document.getElementById('edit-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
+document.getElementById('related-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeRelatedModal();
+});
 
 // ─── FLASHCARDS ───────────────────────────────────────────────────────────────
 function initFlashcards() {
@@ -1275,6 +1423,18 @@ function renderFlashcard() {
 
   const w = fcQueue[fcIndex];
   const progress = (fcIndex / fcQueue.length) * 100;
+  const fcDefs = (w.definitions && w.definitions.length > 1) ? w.definitions : null;
+  const fcBackDefs = fcDefs
+    ? fcDefs.map(d => `
+        <div style="margin-bottom:8px;">
+          <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);background:var(--surface2);border-radius:4px;padding:1px 5px;">${d.pos}</span>
+          <div class="fc-def" style="margin-top:3px;">${d.definition}</div>
+          ${d.example ? `<div class="fc-example">"${d.example}"</div>` : ''}
+        </div>`).join('')
+    : `<div class="fc-def">${w.definition}</div>${w.example ? `<div class="fc-example">"${w.example}"</div>` : ''}`;
+  const fcFrontPos = fcDefs
+    ? fcDefs.map(d => `<span class="fc-pos">${d.pos}</span>`).join(' ')
+    : (w.pos ? `<div class="fc-pos">${w.pos}</div>` : '');
 
   container.innerHTML = `
     <div class="fc-progress-bar"><div class="fc-progress-fill" style="width:${progress}%"></div></div>
@@ -1284,14 +1444,13 @@ function renderFlashcard() {
           <div class="fc-hint">Click to reveal definition</div>
           <div class="fc-word">${w.word}</div>
           ${w.pronunciation ? `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);margin-top:6px;">/${w.pronunciation}/</div>` : ''}
-          ${w.pos ? `<div class="fc-pos">${w.pos}</div>` : ''}
+          ${fcFrontPos}
         </div>
         <div class="fc-face fc-back">
           <div class="fc-hint">Rate your recall</div>
           ${w.chinese ? `<div style="font-size:18px;color:var(--accent);font-weight:500;margin-bottom:6px">${w.chinese}</div>` : ''}
           ${w.pronunciation ? `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);margin-bottom:10px;">/${w.pronunciation}/</div>` : ''}
-          <div class="fc-def">${w.definition}</div>
-          ${w.example ? `<div class="fc-example">"${w.example}"</div>` : ''}
+          ${fcBackDefs}
         </div>
       </div>
     </div>
