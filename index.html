@@ -401,6 +401,15 @@
     .fc-face { padding: 22px 20px; }
   }
 
+  /* BATCH ENRICH MODAL */
+  .batch-progress-bar { height: 6px; background: var(--surface3); border-radius: 3px; margin: 12px 0; overflow: hidden; }
+  .batch-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+  .batch-word-log { max-height: 160px; overflow-y: auto; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); margin-top: 8px; }
+  .batch-word-log div { padding: 2px 0; }
+  .batch-word-log .log-ok { color: var(--success); }
+  .batch-word-log .log-skip { color: var(--text3); }
+  .batch-word-log .log-err { color: var(--danger); }
+
   /* MULTI-DEF ENTRY FORM */
   .def-entry { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; background: var(--surface); }
   .def-entry-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
@@ -463,9 +472,12 @@
 
 <!-- WORD LIBRARY -->
 <div class="view active" id="view-words">
-  <div class="view-header">
-    <h1 class="view-title">Word <em>Library</em></h1>
-    <p class="view-sub">Build your personal lexicon — add, edit, and organize your vocabulary.</p>
+  <div class="view-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h1 class="view-title">Word <em>Library</em></h1>
+      <p class="view-sub">Build your personal lexicon — add, edit, and organize your vocabulary.</p>
+    </div>
+    <button class="btn btn-ghost" onclick="batchEnrich()" style="font-size:12px;padding:6px 14px;white-space:nowrap;margin-top:6px;">✦ Enrich All POS</button>
   </div>
 
   <div class="word-form">
@@ -565,6 +577,20 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
       <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Enrich Modal -->
+<div class="modal-overlay" id="batch-modal">
+  <div class="modal" style="max-width:460px;width:90%;">
+    <h3 id="batch-title">Enriching Library…</h3>
+    <p id="batch-status" style="font-size:13px;color:var(--text2);margin-top:6px;"></p>
+    <div class="batch-progress-bar"><div class="batch-progress-fill" id="batch-fill" style="width:0%"></div></div>
+    <div class="batch-word-log" id="batch-log"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn btn-ghost" id="batch-cancel-btn" onclick="batchCancel()">Cancel</button>
+      <button class="btn btn-primary" id="batch-done-btn" style="display:none;" onclick="closeBatchModal()">Done</button>
     </div>
   </div>
 </div>
@@ -1086,6 +1112,97 @@ async function aiChineseToEnglish() {
   } finally {
     btn.disabled = false; btn.textContent = '中 → EN';
   }
+}
+
+// ─── BATCH ENRICH ─────────────────────────────────────────────────────────────
+let batchShouldCancel = false;
+
+function closeBatchModal() { document.getElementById('batch-modal').classList.remove('open'); }
+function batchCancel() { batchShouldCancel = true; closeBatchModal(); }
+
+function batchLog(msg, cls='') {
+  const log = document.getElementById('batch-log');
+  const div = document.createElement('div');
+  if (cls) div.className = cls;
+  div.textContent = msg;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function batchEnrich() {
+  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
+  if (!apiKey) { openSettings(); return; }
+
+  const toEnrich = words.filter(w => !w.definitions);
+  if (toEnrich.length === 0) { alert('All words already have multi-POS data.'); return; }
+  if (!confirm(`Will call AI for ${toEnrich.length} words to add all parts of speech.\n\nThis may take a few minutes. Continue?`)) return;
+
+  batchShouldCancel = false;
+  document.getElementById('batch-title').textContent = 'Enriching Library…';
+  document.getElementById('batch-status').textContent = '';
+  document.getElementById('batch-log').innerHTML = '';
+  document.getElementById('batch-fill').style.width = '0%';
+  document.getElementById('batch-cancel-btn').style.display = '';
+  document.getElementById('batch-done-btn').style.display = 'none';
+  document.getElementById('batch-modal').classList.add('open');
+
+  let done = 0, enriched = 0, errors = 0;
+
+  for (const w of toEnrich) {
+    if (batchShouldCancel) break;
+
+    document.getElementById('batch-status').textContent = `Processing: ${w.word} (${done + 1} / ${toEnrich.length})`;
+    document.getElementById('batch-fill').style.width = `${Math.round(done / toEnrich.length * 100)}%`;
+
+    try {
+      const prompt = [
+        'You are helping a learner build an IELTS vocabulary notebook.',
+        'Generate fields for the given English word.',
+        'Return ONLY valid JSON (no markdown, no extra text).',
+        'JSON schema: { "pronunciation": string, "chinese_zh": string, "definitions": [{"pos": string, "definition_en": string, "example": string}] }',
+        'Rules:',
+        '- pronunciation: IPA; no surrounding slashes.',
+        '- chinese_zh: 简体中文，覆盖该词所有常用词性，精炼。',
+        '- definitions: include ALL common parts of speech (1-3 entries).',
+        '    pos: exactly one of: adjective, noun, verb, adverb, phrase',
+        '    definition_en: one sentence, learner-friendly, IELTS-appropriate',
+        '    example: one natural IELTS-style sentence',
+        `Word: ${w.word}`,
+      ].join('\n');
+
+      const text = await callAI(prompt, 700);
+      const obj = extractJsonObject(text);
+      if (!obj || !Array.isArray(obj.definitions) || obj.definitions.length === 0) throw new Error('parse failed');
+
+      const defs = obj.definitions.map(d => ({ pos: (d.pos||'').trim(), definition: (d.definition_en||'').trim(), example: (d.example||'').trim() }));
+      if (obj.pronunciation) w.pronunciation = aiNormalizePronunciation(obj.pronunciation);
+      if (obj.chinese_zh) w.chinese = obj.chinese_zh;
+      if (defs.length > 1) {
+        w.definitions = defs;
+        batchLog(`✓ ${w.word} — ${defs.map(d=>d.pos).join(', ')}`, 'log-ok');
+        enriched++;
+      } else {
+        // Single POS — update primary fields only, no definitions array needed
+        if (defs[0]) { w.pos = defs[0].pos; w.definition = defs[0].definition; w.example = defs[0].example; }
+        batchLog(`· ${w.word} — ${defs[0]?.pos || 'single'}`, 'log-skip');
+      }
+    } catch (e) {
+      batchLog(`✗ ${w.word} — ${e.message}`, 'log-err');
+      errors++;
+    }
+
+    done++;
+    // Small delay to avoid rate limiting
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  saveData();
+  renderWordList();
+  document.getElementById('batch-fill').style.width = '100%';
+  document.getElementById('batch-title').textContent = batchShouldCancel ? 'Cancelled' : 'Done!';
+  document.getElementById('batch-status').textContent = `${enriched} words enriched with multiple POS · ${errors} errors`;
+  document.getElementById('batch-cancel-btn').style.display = 'none';
+  document.getElementById('batch-done-btn').style.display = '';
 }
 
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
