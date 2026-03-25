@@ -734,7 +734,7 @@ function loadFromFile(event) {
       words = payload.words;
       sessionLog = Array.isArray(payload.sessionLog) ? payload.sessionLog : [];
       saveData();
-      renderWords();
+      renderWordList();
       renderStats();
       alert('导入成功！');
     } catch(err) {
