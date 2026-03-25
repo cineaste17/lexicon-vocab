@@ -178,7 +178,6 @@
   .word-card-pos {
     font-family: 'DM Mono', monospace; font-size: 10px;
     color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em;
-    margin-left: 8px;
     background: var(--accent-tint); padding: 2px 6px; border-radius: 4px;
   }
   .word-card-def {
@@ -186,9 +185,11 @@
   }
   .word-card-example {
     font-size: 12px; color: var(--text3);
-    font-style: italic; margin-top: 5px;
-    border-left: 2px solid var(--accent); padding-left: 10px;
+    font-style: italic; margin-top: 4px;
+    border-left: 2px solid var(--accent); padding-left: 8px;
   }
+  .def-block { margin-top: 8px; }
+  .def-block + .def-block { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); }
   .word-card-actions { display: flex; gap: 2px; flex-shrink: 0; }
   .icon-btn {
     background: none; border: none; cursor: pointer;
@@ -1471,32 +1472,33 @@ function renderWordList() {
 
   list.innerHTML = filtered.map(w => {
     const defs = (w.definitions && w.definitions.length > 1) ? w.definitions : null;
-    const defHtml = defs
-      ? defs.map(d => `<div class="multi-def-row"><span class="multi-def-pos">${d.pos}</span><span>${d.definition}</span></div>`).join('')
-      : `<div class="word-card-def">${w.definition}</div>`;
-    const exHtml = defs
-      ? (defs[0].example ? `<div class="word-card-example">${defs[0].example}</div>` : '')
-      : (w.example ? `<div class="word-card-example">${w.example}</div>` : '');
-    const posHtml = defs
-      ? defs.map(d => `<span class="word-card-pos">${d.pos}</span>`).join(' ')
-      : (w.pos ? `<span class="word-card-pos">${w.pos}</span>` : '');
+    const defsHtml = defs
+      ? defs.map(d => `
+          <div class="def-block">
+            <span class="word-card-pos">${d.pos}</span>
+            <div class="word-card-def">${d.definition}</div>
+            ${d.example ? `<div class="word-card-example">${d.example}</div>` : ''}
+          </div>`).join('')
+      : `<div class="word-card-def" style="margin-top:4px;">${w.definition}</div>
+         ${w.example ? `<div class="word-card-example">${w.example}</div>` : ''}`;
+    const singlePos = !defs && w.pos ? `<span class="word-card-pos" style="margin-left:8px;">${w.pos}</span>` : '';
     return `
     <div class="word-card" id="wc-${w.id}">
-      <div class="word-card-body">
-        <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-          <span class="word-card-word">${w.word}</span>
-          ${posHtml}
+      <div class="word-card-body" style="min-width:0;">
+        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;">
+          <span class="word-card-word">${w.word}</span>${singlePos}
         </div>
-        ${w.pronunciation ? `<div style="font-size:12px;color:var(--text3);margin-top:2px;">/${w.pronunciation}/</div>` : ''}
-        ${w.chinese ? `<div style="font-size:13px;color:var(--accent);font-weight:500;margin-top:3px;letter-spacing:0.02em">${w.chinese}</div>` : ''}
-        ${defHtml}
-        ${exHtml}
+        ${w.pronunciation ? `<div style="font-size:12px;color:var(--text3);margin-top:1px;">/${w.pronunciation}/</div>` : ''}
+        ${w.chinese ? `<div style="font-size:13px;color:var(--accent);font-weight:500;margin-top:3px;">${w.chinese}</div>` : ''}
+        ${defsHtml}
       </div>
-      <span class="mastery-badge m-${w.mastery}">${w.mastery}</span>
-      ${w.tag ? `<span class="mastery-badge" style="background:#f0eefb;color:var(--accent3);border:1px solid #cdc8ef">${w.tag}</span>` : ''}
-      <div class="word-card-actions">
-        <button class="icon-btn" onclick="openEdit('${w.id}')" title="Edit">✎</button>
-        <button class="icon-btn del" onclick="deleteWord('${w.id}')" title="Delete">✕</button>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+        <div class="word-card-actions">
+          <button class="icon-btn" onclick="openEdit('${w.id}')" title="Edit">✎</button>
+          <button class="icon-btn del" onclick="deleteWord('${w.id}')" title="Delete">✕</button>
+        </div>
+        <span class="mastery-badge m-${w.mastery}">${w.mastery}</span>
+        ${w.tag ? `<span class="mastery-badge" style="background:#f0eefb;color:var(--accent3);border:1px solid #cdc8ef">${w.tag}</span>` : ''}
       </div>
     </div>`;
   }).join('');
