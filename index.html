@@ -4,181 +4,166 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lexicon — Advanced Vocabulary Studio</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Lexicon">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #ffffff;
-    --surface: #f8fafc;
-    --surface2: #f1f5f9;
-    --surface3: #e2e8f0;
-    --border: #e2e8f0;
-    --accent: #2563eb;
-    --accent-hover: #1d4ed8;
-    --accent2: #0284c7;
-    --accent3: #6366f1;
-    --accent-tint: #eff6ff;
-    --accent-tint-border: #bfdbfe;
-    --nav-bg: rgba(255,255,255,0.80);
-    --text: #0f172a;
-    --text2: #475569;
-    --text3: #94a3b8;
-    --danger: #dc2626;
-    --success: #16a34a;
+    --surface: #f7f7f9;
+    --surface2: #eeeff4;
+    --surface3: #e4e5ec;
+    --border: #dcdee8;
+    --accent: #a07830;
+    --accent2: #3a7d55;
+    --accent3: #5b4fb5;
+    --text: #1a1a2e;
+    --text2: #52526e;
+    --text3: #9898b0;
+    --danger: #c0392b;
+    --success: #3a7d55;
     --card-w: 540px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'DM Sans', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
   }
 
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.4;
+  }
+
   /* NAV */
   nav {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 40px;
-    height: 56px;
+    padding: 20px 40px;
     border-bottom: 1px solid var(--border);
     position: sticky; top: 0;
-    background: var(--nav-bg);
-    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
     z-index: 100;
   }
 
   .logo {
-    font-family: 'Inter', sans-serif;
-    font-size: 15px; font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text);
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
   }
-  .logo span { color: var(--text3); font-size: 10px; font-family: 'DM Mono', monospace; display: block; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 400; margin-top: 1px; }
+  .logo span { color: var(--text3); font-size: 11px; font-family: 'DM Mono', monospace; display: block; letter-spacing: 0.2em; text-transform: uppercase; }
 
-  .nav-tabs { display: flex; gap: 2px; }
+  .nav-tabs { display: flex; gap: 4px; }
   .nav-tab {
     background: none; border: none; cursor: pointer;
-    padding: 6px 14px; border-radius: 6px;
-    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
-    color: var(--text3); transition: all 0.15s;
+    padding: 8px 18px; border-radius: 6px;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text3); transition: all 0.2s;
   }
   .nav-tab:hover { color: var(--text2); background: var(--surface2); }
-  .nav-tab.active { color: var(--accent); background: var(--accent-tint); }
-
-  .nav-mobile-only { display: none; }
-  @media (max-width: 640px) {
-    nav { padding: 0 14px; }
-    .nav-desktop-only { display: none !important; }
-    .nav-mobile-only { display: block; }
-    .logo span { display: none; }
-  }
+  .nav-tab.active { color: var(--accent); background: var(--surface2); }
 
   .stat-pill {
     font-family: 'DM Mono', monospace; font-size: 11px;
-    color: var(--text3); letter-spacing: 0.06em;
+    color: var(--text3); letter-spacing: 0.08em;
   }
-  .stat-pill strong { color: var(--text); font-weight: 600; }
+  .stat-pill strong { color: var(--accent); font-weight: 500; }
 
   /* VIEWS */
-  .view { display: none; padding: 48px 40px; max-width: 880px; margin: 0 auto; }
-  .view.active { display: block; animation: fadeIn 0.2s ease; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .view { display: none; padding: 48px 40px; max-width: 900px; margin: 0 auto; }
+  .view.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
   /* SECTION HEADERS */
-  .view-header { margin-bottom: 36px; }
+  .view-header { margin-bottom: 40px; }
   .view-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 26px; font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 400;
     color: var(--text); line-height: 1.2;
-    letter-spacing: -0.03em;
   }
-  .view-title em { color: var(--accent); font-style: normal; }
+  .view-title em { color: var(--accent); font-style: italic; }
   .view-sub {
-    margin-top: 6px; font-size: 13px;
-    color: var(--text3); font-weight: 400;
+    margin-top: 8px; font-size: 13px;
+    color: var(--text3); font-weight: 300; letter-spacing: 0.02em;
   }
 
   /* WORD MANAGER */
   .word-form {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px; padding: 24px;
-    margin-bottom: 28px;
+    border-radius: 12px; padding: 28px;
+    margin-bottom: 32px;
   }
   .word-form h3 {
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.18em;
-    color: var(--text3); margin-bottom: 18px;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.2em;
+    color: var(--text3); margin-bottom: 20px;
   }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
   .form-row.full { grid-template-columns: 1fr; }
 
-  label { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  label { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 6px; }
 
   input, textarea, select {
-    width: 100%; background: var(--bg);
+    width: 100%; background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 7px; padding: 9px 12px;
-    color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
-    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    border-radius: 8px; padding: 10px 14px;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s;
     resize: none;
   }
-  input:focus, textarea:focus, select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
-  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
   textarea { height: 72px; }
-  select option { background: var(--bg); }
+  select option { background: var(--surface2); }
 
   .btn {
-    padding: 9px 18px; border-radius: 7px;
-    border: none; cursor: pointer; font-family: 'Inter', sans-serif;
-    font-size: 13px; font-weight: 500;
-    transition: all 0.15s;
+    padding: 10px 22px; border-radius: 8px;
+    border: none; cursor: pointer; font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: all 0.2s;
   }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: var(--accent-hover); }
-  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
-  .btn-ghost:hover { color: var(--text); border-color: var(--text3); background: var(--surface); }
-  .btn-danger { background: transparent; color: var(--danger); border: 1px solid #fca5a5; }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-primary:hover { background: #d4b87a; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text3); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text3); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
   .btn-danger:hover { background: var(--danger); color: white; }
 
   /* WORD LIST */
   .list-controls {
-    display: flex; gap: 8px; margin-bottom: 16px; align-items: center;
+    display: flex; gap: 10px; margin-bottom: 20px; align-items: center;
   }
-  .list-controls input { max-width: 240px; }
+  .list-controls input { max-width: 280px; }
   .list-count {
     margin-left: auto; font-family: 'DM Mono', monospace;
     font-size: 11px; color: var(--text3);
   }
 
-  .word-list { display: flex; flex-direction: column; gap: 6px; }
+  .word-list { display: flex; flex-direction: column; gap: 10px; }
   .word-card {
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 9px; padding: 16px 20px;
-    display: flex; align-items: flex-start; gap: 14px;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 22px;
+    display: flex; align-items: flex-start; gap: 16px;
+    transition: border-color 0.2s;
   }
-  .word-card:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .word-card:hover { border-color: var(--surface3); }
   .word-card-body { flex: 1; }
   .word-card-word {
-    font-family: 'Inter', sans-serif;
-    font-size: 15px; font-weight: 600; color: var(--text);
-    letter-spacing: -0.01em;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; color: var(--text);
   }
   .word-card-pos {
     font-family: 'DM Mono', monospace; font-size: 10px;
-    color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em;
-    background: var(--accent-tint); padding: 2px 6px; border-radius: 4px;
+    color: var(--accent3); text-transform: uppercase; letter-spacing: 0.15em;
+    margin-left: 8px;
   }
   .word-card-def {
     font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5;
@@ -186,44 +171,35 @@
   .word-card-example {
     font-size: 12px; color: var(--text3);
     font-style: italic; margin-top: 4px;
-    border-left: 2px solid var(--accent); padding-left: 8px;
+    border-left: 2px solid var(--border); padding-left: 10px;
   }
-  .def-block { margin-top: 8px; }
-  .def-block + .def-block { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); }
-  .word-card-actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .word-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
   .icon-btn {
     background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 14px; padding: 5px 7px;
-    border-radius: 5px; transition: all 0.15s;
+    color: var(--text3); font-size: 16px; padding: 4px;
+    border-radius: 4px; transition: color 0.2s;
     line-height: 1;
   }
-  .icon-btn:hover { color: var(--text); background: var(--surface2); }
-  .icon-btn.del:hover { color: var(--danger); background: #fef2f2; }
-  .fc-speak-btn {
-    background: none; border: none; cursor: pointer;
-    font-size: 18px; padding: 4px 6px; border-radius: 8px;
-    opacity: 0.5; transition: opacity 0.15s, transform 0.15s;
-    line-height: 1; flex-shrink: 0;
-  }
-  .fc-speak-btn:hover { opacity: 1; transform: scale(1.15); }
+  .icon-btn:hover { color: var(--text); }
+  .icon-btn.del:hover { color: var(--danger); }
 
   .mastery-badge {
     font-family: 'DM Mono', monospace; font-size: 9px;
-    padding: 3px 7px; border-radius: 20px;
-    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 20px;
+    letter-spacing: 0.1em; text-transform: uppercase;
     flex-shrink: 0; align-self: flex-start;
-    margin-top: 3px;
+    margin-top: 4px;
   }
-  .m-new { background: var(--surface2); color: var(--text3); border: 1px solid var(--surface3); }
-  .m-learning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-  .m-mastered { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .m-new { background: #f0f0f5; color: var(--text3); border: 1px solid var(--border); }
+  .m-learning { background: #fdf5e8; color: #a07830; border: 1px solid #f0ddb0; }
+  .m-mastered { background: #eef6f1; color: var(--accent2); border: 1px solid #c0deca; }
 
   /* FLASHCARD VIEW */
   .fc-container { display: flex; flex-direction: column; align-items: center; }
 
   .fc-progress-bar {
     width: 100%; max-width: var(--card-w);
-    height: 2px; background: var(--surface2);
+    height: 3px; background: var(--surface2);
     border-radius: 2px; margin-bottom: 32px;
   }
   .fc-progress-fill {
@@ -233,44 +209,42 @@
 
   .fc-card-wrap {
     width: var(--card-w); perspective: 1200px;
-    cursor: pointer; margin-bottom: 24px;
+    cursor: pointer; margin-bottom: 28px;
   }
   .fc-card {
     width: 100%; height: 300px;
     position: relative; transform-style: preserve-3d;
-    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
-    border-radius: 14px;
+    transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+    border-radius: 16px;
   }
   .fc-card.flipped { transform: rotateY(180deg); }
 
   .fc-face {
     position: absolute; inset: 0;
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
-    border-radius: 14px; border: 1px solid var(--border);
+    border-radius: 16px; border: 1px solid var(--border);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 40px; text-align: center;
   }
   .fc-front { background: var(--surface); }
-  .fc-back { background: var(--bg); transform: rotateY(180deg); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); justify-content: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .fc-back { background: var(--surface2); transform: rotateY(180deg); }
 
   .fc-hint {
     font-family: 'DM Mono', monospace; font-size: 10px;
-    letter-spacing: 0.15em; text-transform: uppercase;
+    letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--text3); margin-bottom: 20px;
   }
   .fc-word {
-    font-family: 'Inter', sans-serif;
-    font-size: 38px; color: var(--text); line-height: 1.1;
-    font-weight: 700; letter-spacing: -0.03em;
+    font-family: 'Playfair Display', serif;
+    font-size: 42px; color: var(--text); line-height: 1.1;
   }
   .fc-pos {
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    color: var(--accent); text-transform: uppercase;
-    letter-spacing: 0.1em; margin-top: 10px;
-    background: var(--accent-tint); padding: 3px 8px; border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--accent3); text-transform: uppercase;
+    letter-spacing: 0.15em; margin-top: 8px;
   }
   .fc-def {
-    font-size: 15px; color: var(--text2);
+    font-size: 16px; color: var(--text2);
     line-height: 1.6; margin-bottom: 12px;
   }
   .fc-example {
@@ -279,168 +253,147 @@
   }
 
   .fc-controls { display: flex; gap: 14px; align-items: center; }
-  .fc-rate-btns { display: flex; gap: 8px; }
+  .fc-rate-btns { display: flex; gap: 10px; }
   .fc-rate-btn {
-    padding: 10px 20px; border-radius: 7px;
+    padding: 11px 24px; border-radius: 8px;
     border: none; cursor: pointer;
-    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
-    transition: all 0.15s;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: all 0.2s;
   }
-  .fc-rate-again { background: #fef2f2; color: var(--danger); border: 1px solid #fca5a5; }
+  .fc-rate-again { background: #fdf0ee; color: var(--danger); border: 1px solid #f5cdc8; }
   .fc-rate-again:hover { background: var(--danger); color: white; }
-  .fc-rate-good { background: var(--accent-tint); color: var(--accent); border: 1px solid var(--accent-tint-border); }
-  .fc-rate-good:hover { background: var(--accent); color: white; }
-  .fc-rate-easy { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-  .fc-rate-easy:hover { background: #16a34a; color: white; }
+  .fc-rate-good { background: #eef6f1; color: var(--accent2); border: 1px solid #c0deca; }
+  .fc-rate-good:hover { background: var(--accent2); color: white; }
+  .fc-rate-easy { background: #f0eefb; color: var(--accent3); border: 1px solid #cdc8ef; }
+  .fc-rate-easy:hover { background: var(--accent3); color: white; }
 
   .fc-skip {
     background: none; border: none; cursor: pointer;
     font-family: 'DM Mono', monospace; font-size: 10px;
-    color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 8px 12px; transition: color 0.15s;
+    color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 8px 12px; transition: color 0.2s;
   }
   .fc-skip:hover { color: var(--text2); }
 
   .fc-status {
     font-family: 'DM Mono', monospace; font-size: 11px;
-    color: var(--text3); margin-top: 16px; letter-spacing: 0.06em;
+    color: var(--text3); margin-top: 20px; letter-spacing: 0.08em;
   }
 
   .fc-empty, .fc-complete {
     text-align: center; padding: 80px 40px;
   }
-  .fc-empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.3; }
+  .fc-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
   .fc-complete h2 {
-    font-family: 'Inter', sans-serif;
-    font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 10px;
-    letter-spacing: -0.02em;
+    font-family: 'Playfair Display', serif;
+    font-size: 32px; color: var(--accent); margin-bottom: 12px;
   }
   .fc-complete p { color: var(--text3); font-size: 14px; margin-bottom: 24px; }
 
   /* STATS VIEW */
-  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
   .stat-card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 20px;
+    border-radius: 12px; padding: 24px;
   }
   .stat-card-label {
     font-family: 'DM Mono', monospace; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.15em; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.2em; color: var(--text3);
     margin-bottom: 10px;
   }
   .stat-card-value {
-    font-family: 'Inter', sans-serif; font-size: 34px;
-    font-weight: 700; color: var(--accent); line-height: 1;
-    letter-spacing: -0.03em;
+    font-family: 'Playfair Display', serif; font-size: 40px;
+    color: var(--accent); line-height: 1;
   }
   .stat-card-sub { font-size: 12px; color: var(--text3); margin-top: 6px; }
 
   .stats-section-title {
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.15em; color: var(--text3);
-    margin-bottom: 14px; margin-top: 28px;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.2em; color: var(--text3);
+    margin-bottom: 16px; margin-top: 32px;
   }
 
   .mastery-bar-row {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
   }
   .mastery-bar-label { font-size: 12px; color: var(--text2); width: 80px; flex-shrink: 0; }
   .mastery-bar-track {
-    flex: 1; height: 6px; background: var(--surface2);
-    border-radius: 3px; overflow: hidden;
+    flex: 1; height: 8px; background: var(--surface2);
+    border-radius: 4px; overflow: hidden;
   }
-  .mastery-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .mastery-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
   .mastery-bar-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); width: 30px; text-align: right; }
 
-  .recent-activity { display: flex; flex-direction: column; gap: 6px; }
+  .recent-activity { display: flex; flex-direction: column; gap: 8px; }
   .activity-row {
-    display: flex; gap: 12px; align-items: center;
-    padding: 10px 14px; background: var(--surface);
-    border-radius: 7px; border: 1px solid var(--border);
+    display: flex; gap: 14px; align-items: center;
+    padding: 12px 16px; background: var(--surface);
+    border-radius: 8px; border: 1px solid var(--border);
   }
   .activity-word {
-    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    font-family: 'Playfair Display', serif; font-size: 15px;
     flex: 1;
   }
   .activity-result {
     font-family: 'DM Mono', monospace; font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.08em;
+    text-transform: uppercase; letter-spacing: 0.1em;
   }
-  .r-easy { color: #16a34a; }
-  .r-good { color: var(--accent); }
+  .r-easy { color: var(--accent3); }
+  .r-good { color: var(--accent2); }
   .r-again { color: var(--danger); }
 
   /* MODAL / EDIT */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(15,23,42,0.5);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
     z-index: 1000; display: flex; align-items: center; justify-content: center;
     backdrop-filter: blur(4px);
     opacity: 0; pointer-events: none; transition: opacity 0.2s;
   }
   .modal-overlay.open { opacity: 1; pointer-events: all; }
   .modal {
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 14px; padding: 28px; width: 480px; max-width: 90vw;
-    transform: translateY(8px); transition: transform 0.2s;
-    box-shadow: 0 20px 60px rgba(15,23,42,0.12);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; width: 500px; max-width: 90vw;
+    transform: translateY(10px); transition: transform 0.2s;
   }
   .modal-overlay.open .modal { transform: translateY(0); }
   .modal h3 {
-    font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700;
-    margin-bottom: 20px; letter-spacing: -0.02em;
+    font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 24px;
   }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
   /* EMPTY STATE */
   .empty-state {
     text-align: center; padding: 60px; color: var(--text3);
   }
-  .empty-state-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.3; }
+  .empty-state-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.3; }
   .empty-state p { font-size: 14px; }
 
   /* Responsive */
   @media (max-width: 600px) {
-    nav { padding: 0 20px; }
-    .view { padding: 28px 20px; }
+    nav { padding: 16px 20px; }
+    .view { padding: 32px 20px; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .form-row { grid-template-columns: 1fr; }
-    :root { --card-w: 100%; }
-    .fc-card { height: 300px; }
-    .fc-face { padding: 20px 18px; }
-    .fc-back { padding: 16px 18px; }
+    --card-w: 100%;
+    .fc-word { font-size: 32px; }
   }
 
-  /* BATCH ENRICH MODAL */
-  .batch-progress-bar { height: 6px; background: var(--surface3); border-radius: 3px; margin: 12px 0; overflow: hidden; }
-  .batch-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
-  .batch-word-log { max-height: 160px; overflow-y: auto; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); margin-top: 8px; }
-  .batch-word-log div { padding: 2px 0; }
-  .batch-word-log .log-ok { color: var(--success); }
-  .batch-word-log .log-skip { color: var(--text3); }
-  .batch-word-log .log-err { color: var(--danger); }
-
-  /* MULTI-DEF ENTRY FORM */
-  .def-entry { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; background: var(--surface); }
-  .def-entry-header { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .def-entry-header select { flex: 0 0 130px; }
-  .def-entry textarea { width: 100%; resize: vertical; min-height: 60px; margin-bottom: 6px; }
-  .def-entry input[type=text] { width: 100%; }
-  .def-remove { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 4px; }
-  .def-remove:hover { color: var(--danger); background: #fef2f2; }
-
-  /* RELATED WORDS MODAL */
-  .related-list { display: flex; flex-direction: column; gap: 10px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
-  .related-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color 0.15s; }
-  .related-item:hover { border-color: var(--accent); }
-  .related-item input[type=checkbox] { margin-top: 3px; accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
-  .related-item-word { font-weight: 600; color: var(--text); font-size: 15px; }
-  .related-item-pos { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-left: 6px; }
-  .related-item-zh { font-size: 13px; color: var(--accent); font-weight: 500; margin-top: 2px; }
-  .related-item-def { font-size: 13px; color: var(--text2); margin-top: 3px; }
-
-  /* MULTI-POS DISPLAY */
-  .multi-def-row { font-size: 13px; color: var(--text2); display: flex; gap: 6px; align-items: baseline; margin-top: 4px; }
-  .multi-def-pos { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text3); background: var(--surface2); border-radius: 4px; padding: 1px 5px; flex-shrink: 0; }
+  /* CAPTURED VIEW */
+  .captured-status { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
+  .status-dot { width:8px; height:8px; border-radius:50%; background:var(--text3); flex-shrink:0; transition:background 0.3s; }
+  .status-dot.live { background:var(--accent2); box-shadow:0 0 6px var(--accent2); }
+  .status-label { font-family:'DM Mono',monospace; font-size:11px; color:var(--text3); letter-spacing:0.1em; text-transform:uppercase; }
+  .captured-list { display:flex; flex-direction:column; gap:8px; }
+  .captured-item {
+    display:flex; align-items:center; gap:16px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:16px 22px; transition:border-color 0.2s;
+  }
+  .captured-item:hover { border-color:var(--surface3); }
+  .captured-word { font-family:'Playfair Display',serif; font-size:18px; color:var(--text); }
+  .captured-meta { font-size:11px; color:var(--text3); font-family:'DM Mono',monospace; margin-top:3px; letter-spacing:0.04em; }
+  .captured-in-lib { font-family:'DM Mono',monospace; font-size:10px; color:var(--accent2); text-transform:uppercase; letter-spacing:0.12em; }
 </style>
 </head>
 <body>
@@ -451,42 +404,19 @@
     <button class="nav-tab active" onclick="showView('words')">Library</button>
     <button class="nav-tab" onclick="showView('flashcards')">Study</button>
     <button class="nav-tab" onclick="showView('stats')">Progress</button>
+    <button class="nav-tab" onclick="showView('captured')">Captured</button>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <!-- desktop buttons -->
-    <button class="btn btn-ghost nav-desktop-only" style="padding:5px 12px;font-size:12px;" onclick="openSettings()">⚙ API Key</button>
-    <button class="btn btn-ghost nav-desktop-only" style="padding:5px 12px;font-size:12px;" onclick="saveToFile()">Save</button>
-    <button class="btn btn-ghost nav-desktop-only" style="padding:5px 12px;font-size:12px;" onclick="document.getElementById('import-file-input').click()">Import</button>
-    <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="loadFromFile(event)">
-    <!-- mobile ⋯ menu -->
-    <div style="position:relative;" class="nav-mobile-only">
-      <button class="btn btn-ghost" id="more-btn" style="padding:5px 10px;font-size:16px;line-height:1;" onclick="toggleMoreMenu()" title="更多">⋯</button>
-      <div id="more-menu" style="display:none;position:absolute;right:0;top:36px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:200;min-width:130px;">
-        <button class="btn btn-ghost" style="width:100%;text-align:left;padding:8px 12px;font-size:13px;" onclick="openSettings();toggleMoreMenu()">⚙ API Key</button>
-        <button class="btn btn-ghost" style="width:100%;text-align:left;padding:8px 12px;font-size:13px;" onclick="saveToFile();toggleMoreMenu()">↓ Save</button>
-        <button class="btn btn-ghost" style="width:100%;text-align:left;padding:8px 12px;font-size:13px;" onclick="document.getElementById('import-file-input').click();toggleMoreMenu()">↑ Import</button>
-      </div>
-    </div>
-    <!-- theme picker (always visible) -->
-    <div style="position:relative;">
-      <button class="btn btn-ghost" id="theme-btn" style="padding:5px 10px;font-size:14px;" onclick="toggleThemePicker()" title="换肤">🎨</button>
-      <div id="theme-picker" style="display:none;position:absolute;right:0;top:36px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:200;width:180px;">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:0.08em;">THEME</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;" id="theme-swatches"></div>
-      </div>
-    </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="btn btn-ghost" style="padding:6px 14px;font-size:10px;" onclick="saveToFile()">Save</button>
     <div class="stat-pill" id="nav-count"></div>
   </div>
 </nav>
 
 <!-- WORD LIBRARY -->
 <div class="view active" id="view-words">
-  <div class="view-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
-    <div>
-      <h1 class="view-title">Word <em>Library</em></h1>
-      <p class="view-sub">Build your personal lexicon — add, edit, and organize your vocabulary.</p>
-    </div>
-    <button class="btn btn-ghost" onclick="batchEnrich()" style="font-size:12px;padding:6px 14px;white-space:nowrap;margin-top:6px;">✦ Enrich All POS</button>
+  <div class="view-header">
+    <h1 class="view-title">Word <em>Library</em></h1>
+    <p class="view-sub">Build your personal lexicon — add, edit, and organize your vocabulary.</p>
   </div>
 
   <div class="word-form">
@@ -501,25 +431,40 @@
         <input type="text" id="inp-pron" placeholder="例：[ɪˈfemərəl] 或 ee-FEM-uh-rul">
       </div>
     </div>
-    <button class="btn btn-primary" id="btn-ai-fill" onclick="aiFill()" style="width:100%;margin-bottom:14px;">✦ Auto-fill with AI</button>
-    <div style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <label style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:var(--text2);">Definitions</label>
-        <button class="btn btn-ghost" onclick="addDefEntry()" style="padding:5px 12px;font-size:12px;">+ Add POS</button>
+    <div class="form-row">
+      <div>
+        <label>Part of Speech</label>
+        <select id="inp-pos">
+          <option value="">—</option>
+          <option>adjective</option>
+          <option>noun</option>
+          <option>verb</option>
+          <option>adverb</option>
+          <option>phrase</option>
+        </select>
       </div>
-      <div id="def-entries"></div>
+      <div></div>
     </div>
     <div class="form-row full">
-      <div style="display:flex;gap:8px;align-items:flex-end;">
-        <div style="flex:1;">
-          <label>中文翻譯 Chinese Translation</label>
-          <input type="text" id="inp-zh" placeholder="例：短暫的；轉瞬即逝的（或輸入中文查英文）">
-        </div>
-        <button class="btn btn-ghost" id="btn-cn-to-en" onclick="aiChineseToEnglish()" style="white-space:nowrap;flex-shrink:0;height:38px;">中 → EN</button>
+      <div>
+        <label>Definition</label>
+        <textarea id="inp-def" placeholder="Lasting for a very short time; transitory."></textarea>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
-      <button class="btn btn-ghost" id="btn-related" onclick="aiRelatedWords()">Related Words</button>
+    <div class="form-row full">
+      <div>
+        <label>中文翻譯 Chinese Translation</label>
+        <input type="text" id="inp-zh" placeholder="例：短暫的；轉瞬即逝的">
+      </div>
+    </div>
+    <div class="form-row full">
+      <div>
+        <label>Example Sentence</label>
+        <input type="text" id="inp-ex" placeholder="Her fame was ephemeral, lasting only a single season.">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" id="btn-ai-fill" onclick="aiFill()">Auto-fill with AI</button>
       <button class="btn btn-primary" onclick="addWord()">Add to Library</button>
     </div>
   </div>
@@ -562,59 +507,17 @@
   <div id="stats-content"></div>
 </div>
 
-<!-- Settings Modal -->
-<div class="modal-overlay" id="settings-modal">
-  <div class="modal">
-    <h3>AI Settings</h3>
-    <div style="margin-bottom:16px;">
-      <label>AI Provider</label>
-      <select id="settings-provider" onchange="onProviderChange()" style="width:100%;margin-top:4px;">
-        <option value="gemini">Gemini (gemini-2.5-flash)</option>
-        <option value="deepseek">DeepSeek (deepseek-chat)</option>
-      </select>
-    </div>
-    <div id="settings-gemini-section">
-      <p style="font-size:13px;color:var(--text3);margin-bottom:8px;">获取地址：<a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px;">aistudio.google.com</a></p>
-      <label>Gemini API Key</label>
-      <input type="password" id="settings-gemini-key" placeholder="AIza...">
-    </div>
-    <div id="settings-deepseek-section" style="display:none;">
-      <p style="font-size:13px;color:var(--text3);margin-bottom:8px;">获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:var(--accent);text-decoration:underline;text-underline-offset:2px;">platform.deepseek.com</a></p>
-      <label>DeepSeek API Key</label>
-      <input type="password" id="settings-deepseek-key" placeholder="sk-...">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveSettings()">Save</button>
-    </div>
+<!-- CAPTURED -->
+<div class="view" id="view-captured">
+  <div class="view-header">
+    <h1 class="view-title"><em>Captured</em> Words</h1>
+    <p class="view-sub">Words auto-collected from text you highlight while reading — powered by the local tracker.</p>
   </div>
-</div>
-
-<!-- Batch Enrich Modal -->
-<div class="modal-overlay" id="batch-modal">
-  <div class="modal" style="max-width:460px;width:90%;">
-    <h3 id="batch-title">Enriching Library…</h3>
-    <p id="batch-status" style="font-size:13px;color:var(--text2);margin-top:6px;"></p>
-    <div class="batch-progress-bar"><div class="batch-progress-fill" id="batch-fill" style="width:0%"></div></div>
-    <div class="batch-word-log" id="batch-log"></div>
-    <div class="modal-actions" style="margin-top:16px;">
-      <button class="btn btn-ghost" id="batch-cancel-btn" onclick="batchCancel()">Cancel</button>
-      <button class="btn btn-primary" id="batch-done-btn" style="display:none;" onclick="closeBatchModal()">Done</button>
-    </div>
+  <div class="captured-status">
+    <div class="status-dot" id="captured-dot"></div>
+    <span class="status-label" id="captured-status-label">Connecting…</span>
   </div>
-</div>
-
-<!-- Related Words Modal -->
-<div class="modal-overlay" id="related-modal">
-  <div class="modal" style="max-width:580px;width:90%;">
-    <h3>Related Words</h3>
-    <p id="related-modal-sub" style="font-size:13px;color:var(--text3);margin-bottom:16px;"></p>
-    <div class="related-list" id="related-list"></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeRelatedModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="addRelatedWords()">Add Selected</button>
-    </div>
-  </div>
+  <div class="captured-list" id="captured-list"></div>
 </div>
 
 <!-- Edit Modal -->
@@ -729,201 +632,10 @@ function saveToFile() {
   URL.revokeObjectURL(url);
 }
 
-function loadFromFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const payload = JSON.parse(e.target.result);
-      if (!Array.isArray(payload.words)) throw new Error('格式不正确');
-      if (!confirm(`即将导入 ${payload.words.length} 个单词，将覆盖当前数据，确认吗？`)) return;
-      words = payload.words;
-      sessionLog = Array.isArray(payload.sessionLog) ? payload.sessionLog : [];
-      saveData();
-      renderWordList();
-      renderStats();
-      alert('导入成功！');
-    } catch(err) {
-      alert('导入失败：' + err.message);
-    }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
-// ─── THEMES ───────────────────────────────────────────────────────────────────
-const THEME_STORAGE = 'lexicon_theme';
-const THEMES = {
-  blue:    { label:'Blue',    swatch:'#2563eb', accent:'#2563eb', hover:'#1d4ed8', accent2:'#0284c7', accent3:'#6366f1', tint:'#eff6ff', tintBorder:'#bfdbfe' },
-  violet:  { label:'Violet',  swatch:'#7c3aed', accent:'#7c3aed', hover:'#6d28d9', accent2:'#8b5cf6', accent3:'#a855f7', tint:'#f5f3ff', tintBorder:'#ddd6fe' },
-  rose:    { label:'Rose',    swatch:'#e11d48', accent:'#e11d48', hover:'#be123c', accent2:'#f43f5e', accent3:'#ec4899', tint:'#fff1f2', tintBorder:'#fecdd3' },
-  emerald: { label:'Green',   swatch:'#059669', accent:'#059669', hover:'#047857', accent2:'#10b981', accent3:'#34d399', tint:'#ecfdf5', tintBorder:'#a7f3d0' },
-  amber:   { label:'Amber',   swatch:'#d97706', accent:'#b45309', hover:'#92400e', accent2:'#d97706', accent3:'#f59e0b', tint:'#fffbeb', tintBorder:'#fde68a' },
-  dark:    { label:'Dark',    swatch:'#1e293b', accent:'#60a5fa', hover:'#93c5fd', accent2:'#38bdf8', accent3:'#818cf8', tint:'#1e3a5f', tintBorder:'#1e40af',
-             bg:'#0f172a', surface:'#1e293b', surface2:'#334155', surface3:'#475569',
-             border:'#334155', text:'#f1f5f9', text2:'#cbd5e1', text3:'#64748b',
-             navBg:'rgba(15,23,42,0.80)' },
-};
-
-function applyTheme(id) {
-  const t = THEMES[id] || THEMES.blue;
-  const r = document.documentElement.style;
-  r.setProperty('--accent', t.accent);
-  r.setProperty('--accent-hover', t.hover);
-  r.setProperty('--accent2', t.accent2);
-  r.setProperty('--accent3', t.accent3);
-  r.setProperty('--accent-tint', t.tint);
-  r.setProperty('--accent-tint-border', t.tintBorder);
-  r.setProperty('--bg',       t.bg       || '#ffffff');
-  r.setProperty('--surface',  t.surface  || '#f8fafc');
-  r.setProperty('--surface2', t.surface2 || '#f1f5f9');
-  r.setProperty('--surface3', t.surface3 || '#e2e8f0');
-  r.setProperty('--border',   t.border   || '#e2e8f0');
-  r.setProperty('--text',     t.text     || '#0f172a');
-  r.setProperty('--text2',    t.text2    || '#475569');
-  r.setProperty('--text3',    t.text3    || '#94a3b8');
-  r.setProperty('--nav-bg',   t.navBg    || 'rgba(255,255,255,0.96)');
-  // update active swatch ring
-  document.querySelectorAll('.theme-swatch-btn').forEach(el => {
-    el.style.outline = el.dataset.theme === id ? '2px solid var(--accent)' : 'none';
-    el.style.outlineOffset = '2px';
-  });
-  localStorage.setItem(THEME_STORAGE, id);
-}
-
-function buildThemeSwatches() {
-  const cur = localStorage.getItem(THEME_STORAGE) || 'blue';
-  const container = document.getElementById('theme-swatches');
-  container.innerHTML = '';
-  Object.entries(THEMES).forEach(([id, t]) => {
-    const btn = document.createElement('button');
-    btn.className = 'theme-swatch-btn';
-    btn.dataset.theme = id;
-    btn.title = t.label;
-    btn.style.cssText = `width:100%;aspect-ratio:1;border-radius:8px;border:none;cursor:pointer;background:${t.swatch};transition:transform 0.1s;outline:${id===cur?'2px solid '+t.accent:'none'};outline-offset:2px;`;
-    btn.onmouseenter = () => { btn.style.transform = 'scale(1.1)'; };
-    btn.onmouseleave = () => { btn.style.transform = ''; };
-    btn.onclick = () => { applyTheme(id); };
-    container.appendChild(btn);
-  });
-}
-
-function toggleMoreMenu() {
-  const menu = document.getElementById('more-menu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
-function toggleThemePicker() {
-  const picker = document.getElementById('theme-picker');
-  const open = picker.style.display !== 'none';
-  picker.style.display = open ? 'none' : 'block';
-  if (!open) buildThemeSwatches();
-}
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('#theme-btn') && !e.target.closest('#theme-picker'))
-    document.getElementById('theme-picker').style.display = 'none';
-  if (!e.target.closest('#more-btn') && !e.target.closest('#more-menu'))
-    document.getElementById('more-menu').style.display = 'none';
-});
-
-// apply saved theme on load
-applyTheme(localStorage.getItem(THEME_STORAGE) || 'blue');
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'activated') window.location.reload();
-      });
-    });
-  }).catch(() => {});
-}
-
-// ─── AI AUTOFILL ──────────────────────────────────────────────────────────────
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_KEY_STORAGE = 'lexicon_gemini_key';
-const DEEPSEEK_KEY_STORAGE = 'lexicon_deepseek_key';
-const PROVIDER_STORAGE = 'lexicon_ai_provider';
-
+// ─── AI AUTOFILL (Gemini via local server) ─────────────────────────────────────
+const AI_SERVER_URL = 'http://localhost:8787';
 let aiFillInFlight = false;
 let aiFillLastAt = 0;
-let relatedCandidates = [];
-let defEntryCounter = 0;
-
-const POS_OPTIONS = ['adjective','noun','verb','adverb','phrase'];
-
-function makeDefEntryHTML(idx, pos='', def='', ex='') {
-  const opts = POS_OPTIONS.map(p => `<option value="${p}" ${p===pos?'selected':''}>${p}</option>`).join('');
-  return `<div class="def-entry" id="def-entry-${idx}">
-    <div class="def-entry-header">
-      <select id="def-pos-${idx}">
-        <option value="">— POS —</option>${opts}
-      </select>
-      <button class="def-remove" onclick="removeDefEntry(${idx})" title="Remove">✕</button>
-    </div>
-    <textarea id="def-def-${idx}" placeholder="Definition…">${def}</textarea>
-    <input type="text" id="def-ex-${idx}" placeholder="Example sentence…" value="${ex}">
-  </div>`;
-}
-
-function addDefEntry(pos='', def='', ex='') {
-  const idx = ++defEntryCounter;
-  document.getElementById('def-entries').insertAdjacentHTML('beforeend', makeDefEntryHTML(idx, pos, def, ex));
-  updateRemoveButtons();
-}
-
-function removeDefEntry(idx) {
-  const el = document.getElementById('def-entry-' + idx);
-  if (el) el.remove();
-  updateRemoveButtons();
-}
-
-function updateRemoveButtons() {
-  const entries = document.querySelectorAll('#def-entries .def-entry');
-  entries.forEach(e => {
-    const btn = e.querySelector('.def-remove');
-    if (btn) btn.style.visibility = entries.length > 1 ? 'visible' : 'hidden';
-  });
-}
-
-function getDefEntries() {
-  const entries = document.querySelectorAll('#def-entries .def-entry');
-  const result = [];
-  entries.forEach(e => {
-    const idx = e.id.replace('def-entry-', '');
-    const pos = document.getElementById('def-pos-' + idx)?.value || '';
-    const def = document.getElementById('def-def-' + idx)?.value.trim() || '';
-    const ex  = document.getElementById('def-ex-' + idx)?.value.trim() || '';
-    if (def) result.push({ pos, definition: def, example: ex });
-  });
-  return result;
-}
-
-function setDefEntries(arr) {
-  document.getElementById('def-entries').innerHTML = '';
-  defEntryCounter = 0;
-  if (!arr || arr.length === 0) { addDefEntry(); return; }
-  arr.forEach(d => addDefEntry(d.pos || '', d.definition_en || d.definition || '', d.example || ''));
-}
-
-function initDefEntries() {
-  document.getElementById('def-entries').innerHTML = '';
-  defEntryCounter = 0;
-  addDefEntry();
-}
-
-function getProvider() {
-  return localStorage.getItem(PROVIDER_STORAGE) || 'gemini';
-}
-function getApiKey() {
-  return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
-}
-function getDeepSeekKey() {
-  return localStorage.getItem(DEEPSEEK_KEY_STORAGE) || '';
-}
 
 function setAiBtnState(loading) {
   const btn = document.getElementById('btn-ai-fill');
@@ -932,479 +644,228 @@ function setAiBtnState(loading) {
   btn.textContent = loading ? 'AI generating…' : 'Auto-fill with AI';
 }
 
+function aiUserFacingError(e) {
+  const msg = (e && e.message) ? e.message : String(e || 'Unknown error');
+  alert(
+    'AI 自動生成失敗。\n\n' +
+    '常見原因：\n' +
+    '1) 你還沒啟動本地 server（先在 server 目錄執行 npm start）\n' +
+    '2) server/.env 未設定 GEMINI_API_KEY\n' +
+    '3) Gemini 配額/網路問題\n\n' +
+    '錯誤訊息：' + msg
+  );
+}
+
 function aiNormalizePronunciation(s) {
   let t = (s || '').toString().trim();
   if (!t) return '';
+  // 如果模型返回了 /.../ 或 [...], 这里统一去掉外层符号，避免重复展示
   if ((t.startsWith('/') && t.endsWith('/')) || (t.startsWith('[') && t.endsWith(']'))) {
     t = t.slice(1, -1).trim();
   }
   return t;
 }
 
-function extractJsonObject(text) {
-  if (typeof text !== 'string') return null;
-  const first = text.indexOf('{');
-  const last = text.lastIndexOf('}');
-  if (first === -1 || last === -1 || last <= first) return null;
-  try { return JSON.parse(text.slice(first, last + 1)); } catch { return null; }
-}
-
-async function callAI(prompt, maxTokens = 500) {
-  const provider = getProvider();
-  const apiKey = provider === 'deepseek' ? getDeepSeekKey() : getApiKey();
-  if (!apiKey) throw new Error('API Key not set');
-  if (provider === 'deepseek') {
-    const r = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.2, max_tokens: maxTokens })
-    });
-    const data = await r.json().catch(() => null);
-    if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
-    return data?.choices?.[0]?.message?.content || '';
-  } else {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: maxTokens, responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } } })
-    });
-    const data = await r.json().catch(() => null);
-    if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
-    return data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('\n') || '';
-  }
-}
-
 async function aiFill() {
   const word = document.getElementById('inp-word')?.value?.trim() || '';
-  if (!word) { alert('请先输入 Word。'); return; }
-  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
-  if (!apiKey) { openSettings(); return; }
+  const pos = document.getElementById('inp-pos')?.value || '';
+  if (!word) { alert('請先輸入 Word。'); return; }
+
+  // 防抖/防誤觸：2 秒內不重複發送
   const now = Date.now();
   if (aiFillInFlight) return;
   if (now - aiFillLastAt < 2000) return;
   aiFillLastAt = now;
+
   aiFillInFlight = true;
   setAiBtnState(true);
   try {
-    const prompt = [
-      'You are helping a learner build an IELTS vocabulary notebook.',
-      'Generate fields for the given English word.',
-      'Return ONLY valid JSON (no markdown, no extra text).',
-      'JSON schema: { "pronunciation": string, "chinese_zh": string, "definitions": [{"pos": string, "definition_en": string, "example": string}] }',
-      'Rules:',
-      '- pronunciation: IPA if possible; no surrounding slashes.',
-      '- chinese_zh: 简体中文，覆盖该词所有常用词性，精炼。',
-      '- definitions: include ALL common parts of speech (1-3 entries).',
-      '    pos: exactly one of: adjective, noun, verb, adverb, phrase',
-      '    definition_en: one sentence, learner-friendly, IELTS-appropriate',
-      '    example: one natural IELTS-style sentence',
-      `Word: ${word}`,
-    ].join('\n');
-    const text = await callAI(prompt, 700);
-    const obj = extractJsonObject(text);
-    if (!obj) throw new Error('无法解析 AI 返回的内容');
-    const pronunciation = aiNormalizePronunciation((obj.pronunciation || '').toString().trim());
-    const chinese_zh = (obj.chinese_zh || '').toString().trim();
-    if (pronunciation) document.getElementById('inp-pron').value = pronunciation;
-    if (chinese_zh) document.getElementById('inp-zh').value = chinese_zh;
-    if (Array.isArray(obj.definitions) && obj.definitions.length > 0) {
-      setDefEntries(obj.definitions);
+    const r = await fetch(`${AI_SERVER_URL}/api/enrich`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ word, pos })
+    });
+    const data = await r.json().catch(() => null);
+    if (!r.ok) {
+      const message = data?.message || data?.error || `HTTP ${r.status}`;
+      throw new Error(message);
     }
+    const pronunciation = aiNormalizePronunciation((data?.pronunciation || '').toString().trim());
+    const definition_en = (data?.definition_en || '').toString().trim();
+    const chinese_zh = (data?.chinese_zh || '').toString().trim();
+    const example = (data?.example || '').toString().trim();
+
+    if (pronunciation) document.getElementById('inp-pron').value = pronunciation;
+    if (definition_en) document.getElementById('inp-def').value = definition_en;
+    if (chinese_zh) document.getElementById('inp-zh').value = chinese_zh;
+    if (example) document.getElementById('inp-ex').value = example;
   } catch (e) {
-    alert('AI 自动生成失败。\n\n错误信息：' + (e?.message || String(e)));
+    aiUserFacingError(e);
   } finally {
     aiFillInFlight = false;
     setAiBtnState(false);
   }
 }
-
-async function aiRelatedWords() {
-  const word = document.getElementById('inp-word')?.value?.trim() || '';
-  if (!word) { alert('请先输入 Word。'); return; }
-  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
-  if (!apiKey) { openSettings(); return; }
-
-  const btn = document.getElementById('btn-related');
-  btn.disabled = true; btn.textContent = 'Loading…';
-  try {
-    const prompt = [
-      'You are helping a learner build an IELTS vocabulary notebook.',
-      `Generate 5 words closely related to "${word}" (synonyms, derivatives, collocations, or thematically linked words).`,
-      'Return ONLY a valid JSON array (no markdown, no extra text).',
-      'Schema: [{"word":string,"pos":string,"definition_en":string,"chinese_zh":string,"example":string}]',
-      'Rules:',
-      '- pos: exactly one of: adjective, noun, verb, adverb, phrase',
-      '- definition_en: one sentence, learner-friendly, IELTS-appropriate',
-      '- chinese_zh: 简体中文释义，精炼',
-      '- example: one natural IELTS-style sentence',
-      '- do NOT include the source word itself',
-    ].join('\n');
-    const text = await callAI(prompt, 900);
-    const first = text.indexOf('['), last = text.lastIndexOf(']');
-    if (first === -1 || last === -1) throw new Error('无法解析返回内容');
-    const arr = JSON.parse(text.slice(first, last + 1));
-    if (!Array.isArray(arr) || arr.length === 0) throw new Error('返回内容为空');
-    relatedCandidates = arr;
-    document.getElementById('related-modal-sub').textContent = `Words related to "${word}" — select to add to your library.`;
-    document.getElementById('related-list').innerHTML = arr.map((w, i) => `
-      <label class="related-item">
-        <input type="checkbox" checked data-idx="${i}">
-        <div class="related-item-body">
-          <div><span class="related-item-word">${w.word}</span><span class="related-item-pos">${w.pos}</span></div>
-          ${w.chinese_zh ? `<div class="related-item-zh">${w.chinese_zh}</div>` : ''}
-          <div class="related-item-def">${w.definition_en}</div>
-        </div>
-      </label>
-    `).join('');
-    document.getElementById('related-modal').classList.add('open');
-  } catch (e) {
-    alert('AI 生成失败：' + (e?.message || String(e)));
-  } finally {
-    btn.disabled = false; btn.textContent = 'Related Words';
-  }
-}
-
-function closeRelatedModal() { document.getElementById('related-modal').classList.remove('open'); }
-
-function addRelatedWords() {
-  const checkboxes = document.querySelectorAll('#related-list input[type=checkbox]');
-  let added = 0;
-  checkboxes.forEach(cb => {
-    if (!cb.checked) return;
-    const r = relatedCandidates[parseInt(cb.dataset.idx)];
-    if (!r) return;
-    words.unshift({ id: uid(), word: r.word, pos: r.pos||'', pronunciation: '', definition: r.definition_en||'', chinese: r.chinese_zh||'', example: r.example||'', mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine' });
-    added++;
-  });
-  closeRelatedModal();
-  if (added > 0) {
-    saveData(); renderWordList(); updateNavCount();
-    const btn = document.getElementById('btn-related');
-    btn.textContent = `Added ${added}!`;
-    setTimeout(() => btn.textContent = 'Related Words', 2000);
-  }
-}
-
-async function aiChineseToEnglish() {
-  const zh = document.getElementById('inp-zh')?.value?.trim() || '';
-  if (!zh) { alert('请先在中文翻译栏输入中文词语。'); return; }
-  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
-  if (!apiKey) { openSettings(); return; }
-
-  const btn = document.getElementById('btn-cn-to-en');
-  btn.disabled = true; btn.textContent = 'Searching…';
-  try {
-    const prompt = [
-      'You are helping a learner build an IELTS vocabulary notebook.',
-      `Given this Chinese word or phrase: "${zh}"`,
-      'Find the best English equivalent (single word preferred, IELTS-appropriate).',
-      'Return ONLY valid JSON (no markdown, no extra text).',
-      'JSON schema: { "word": string, "pronunciation": string, "chinese_zh": string, "definitions": [{"pos": string, "definition_en": string, "example": string}] }',
-      'Rules:',
-      '- word: the English word or phrase',
-      '- pronunciation: IPA, no surrounding slashes',
-      '- chinese_zh: 简体中文，覆盖主要词性',
-      '- definitions: 1-3 entries; pos must be one of: adjective, noun, verb, adverb, phrase',
-    ].join('\n');
-    const text = await callAI(prompt, 700);
-    const obj = extractJsonObject(text);
-    if (!obj || !obj.word) throw new Error('无法解析返回内容');
-    document.getElementById('inp-word').value = obj.word;
-    if (obj.pronunciation) document.getElementById('inp-pron').value = aiNormalizePronunciation(obj.pronunciation);
-    if (obj.chinese_zh) document.getElementById('inp-zh').value = obj.chinese_zh;
-    if (Array.isArray(obj.definitions) && obj.definitions.length > 0) {
-      setDefEntries(obj.definitions);
-    }
-  } catch (e) {
-    alert('中译英失败：' + (e?.message || String(e)));
-  } finally {
-    btn.disabled = false; btn.textContent = '中 → EN';
-  }
-}
-
-// ─── BATCH ENRICH ─────────────────────────────────────────────────────────────
-let batchShouldCancel = false;
-
-function closeBatchModal() { document.getElementById('batch-modal').classList.remove('open'); }
-function batchCancel() { batchShouldCancel = true; closeBatchModal(); }
-
-function batchLog(msg, cls='') {
-  const log = document.getElementById('batch-log');
-  const div = document.createElement('div');
-  if (cls) div.className = cls;
-  div.textContent = msg;
-  log.appendChild(div);
-  log.scrollTop = log.scrollHeight;
-}
-
-async function batchEnrich() {
-  const apiKey = getProvider() === 'deepseek' ? getDeepSeekKey() : getApiKey();
-  if (!apiKey) { openSettings(); return; }
-
-  const toEnrich = words.filter(w => !w.definitions);
-  if (toEnrich.length === 0) { alert('All words already have multi-POS data.'); return; }
-  if (!confirm(`Will call AI for ${toEnrich.length} words to add all parts of speech.\n\nThis may take a few minutes. Continue?`)) return;
-
-  batchShouldCancel = false;
-  document.getElementById('batch-title').textContent = 'Enriching Library…';
-  document.getElementById('batch-status').textContent = '';
-  document.getElementById('batch-log').innerHTML = '';
-  document.getElementById('batch-fill').style.width = '0%';
-  document.getElementById('batch-cancel-btn').style.display = '';
-  document.getElementById('batch-done-btn').style.display = 'none';
-  document.getElementById('batch-modal').classList.add('open');
-
-  let done = 0, enriched = 0, errors = 0;
-
-  for (const w of toEnrich) {
-    if (batchShouldCancel) break;
-
-    document.getElementById('batch-status').textContent = `Processing: ${w.word} (${done + 1} / ${toEnrich.length})`;
-    document.getElementById('batch-fill').style.width = `${Math.round(done / toEnrich.length * 100)}%`;
+// 这是你的“呼叫 Gemini”的函数
+async function getGeminiResponse(userPrompt) {
+    // 【最重要！】把下面引号里的内容换成你在第一步申请到的通行证
+    const MY_API_KEY = "AIzaSyCB8sUIZOMJeGDniMpG2sbxqdaOOjEQWgw"; 
+    
+    // 这是 Gemini 服务器的地址
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MY_API_KEY}`;
 
     try {
-      const prompt = [
-        'You are helping a learner build an IELTS vocabulary notebook.',
-        'Generate fields for the given English word.',
-        'Return ONLY valid JSON (no markdown, no extra text).',
-        'JSON schema: { "pronunciation": string, "chinese_zh": string, "definitions": [{"pos": string, "definition_en": string, "example": string}] }',
-        'Rules:',
-        '- pronunciation: IPA; no surrounding slashes.',
-        '- chinese_zh: 简体中文，覆盖该词所有常用词性，精炼。',
-        '- definitions: include ALL common parts of speech (1-3 entries).',
-        '    pos: exactly one of: adjective, noun, verb, adverb, phrase',
-        '    definition_en: one sentence, learner-friendly, IELTS-appropriate',
-        '    example: one natural IELTS-style sentence',
-        `Word: ${w.word}`,
-      ].join('\n');
+        const response = await fetch(url, {
+            method: 'POST', // 告诉服务器我们要“发消息”
+            headers: { 'Content-Type': 'application/json' }, // 告诉服务器消息格式是 JSON
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: userPrompt }] // 你想问 Gemini 的问题
+                }]
+            })
+        });
 
-      const text = await callAI(prompt, 700);
-      const obj = extractJsonObject(text);
-      if (!obj || !Array.isArray(obj.definitions) || obj.definitions.length === 0) throw new Error('parse failed');
+        // 如果服务器不高兴（比如 Key 错了或网络不行），它会返回错误
+        if (!response.ok) {
+            throw new Error("服务器拒绝了请求，请检查 API Key 或网络");
+        }
 
-      const defs = obj.definitions.map(d => ({ pos: (d.pos||'').trim(), definition: (d.definition_en||'').trim(), example: (d.example||'').trim() }));
-      if (obj.pronunciation) w.pronunciation = aiNormalizePronunciation(obj.pronunciation);
-      if (obj.chinese_zh) w.chinese = obj.chinese_zh;
-      if (defs.length > 1) {
-        w.definitions = defs;
-        batchLog(`✓ ${w.word} — ${defs.map(d=>d.pos).join(', ')}`, 'log-ok');
-        enriched++;
-      } else {
-        // Single POS — update primary fields only, no definitions array needed
-        if (defs[0]) { w.pos = defs[0].pos; w.definition = defs[0].definition; w.example = defs[0].example; }
-        batchLog(`· ${w.word} — ${defs[0]?.pos || 'single'}`, 'log-skip');
-      }
-    } catch (e) {
-      batchLog(`✗ ${w.word} — ${e.message}`, 'log-err');
-      errors++;
+        const result = await response.json();
+        // 拿到 Gemini 说的话并返回
+        return result.candidates[0].content.parts[0].text;
+
+    } catch (err) {
+        console.error("出错了:", err);
+        return "哎呀，请求失败了，请检查一下你的网络连接！";
     }
-
-    done++;
-    // Small delay to avoid rate limiting
-    await new Promise(r => setTimeout(r, 400));
-  }
-
-  saveData();
-  renderWordList();
-  document.getElementById('batch-fill').style.width = '100%';
-  document.getElementById('batch-title').textContent = batchShouldCancel ? 'Cancelled' : 'Done!';
-  document.getElementById('batch-status').textContent = `${enriched} words enriched with multiple POS · ${errors} errors`;
-  document.getElementById('batch-cancel-btn').style.display = 'none';
-  document.getElementById('batch-done-btn').style.display = '';
 }
-
-// ─── SETTINGS ─────────────────────────────────────────────────────────────────
-function onProviderChange() {
-  const p = document.getElementById('settings-provider').value;
-  document.getElementById('settings-gemini-section').style.display = p === 'gemini' ? '' : 'none';
-  document.getElementById('settings-deepseek-section').style.display = p === 'deepseek' ? '' : 'none';
-}
-function openSettings() {
-  const provider = getProvider();
-  document.getElementById('settings-provider').value = provider;
-  document.getElementById('settings-gemini-key').value = getApiKey();
-  document.getElementById('settings-deepseek-key').value = getDeepSeekKey();
-  onProviderChange();
-  document.getElementById('settings-modal').classList.add('open');
-}
-function closeSettings() {
-  document.getElementById('settings-modal').classList.remove('open');
-}
-function saveSettings() {
-  const provider = document.getElementById('settings-provider').value;
-  const geminiKey = document.getElementById('settings-gemini-key').value.trim();
-  const deepseekKey = document.getElementById('settings-deepseek-key').value.trim();
-  const activeKey = provider === 'deepseek' ? deepseekKey : geminiKey;
-  if (!activeKey) { alert('请输入 API Key。'); return; }
-  localStorage.setItem(PROVIDER_STORAGE, provider);
-  if (geminiKey) localStorage.setItem(GEMINI_KEY_STORAGE, geminiKey);
-  if (deepseekKey) localStorage.setItem(DEEPSEEK_KEY_STORAGE, deepseekKey);
-  closeSettings();
-}
-document.getElementById('settings-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeSettings();
-});
-
 function getDefaultWords() {
   const t = Date.now();
   return [
     // ── IELTS Academic Core ──
-    { id: uid(), word: 'allocate', pos: 'verb', pronunciation: 'ˈæləkeɪt', definition: 'To distribute resources or duties for a specific purpose.', chinese: '分配；撥給', example: 'The government allocated substantial funds to renewable energy research.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'ambiguous', pos: 'adjective', pronunciation: 'æmˈbɪɡjuəs', definition: 'Open to more than one interpretation; not having one obvious meaning.', chinese: '模稜兩可的；含糊的', example: 'The instructions were ambiguous, leading to confusion among students.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'assess', pos: 'verb', pronunciation: 'əˈses', definition: 'To evaluate or estimate the nature, quality, or ability of something.', chinese: '評估；評定', example: 'Educators must assess students\' progress regularly.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'attribute', pos: 'verb', pronunciation: 'əˈtrɪbjuːt', definition: 'To regard something as being caused by a particular factor.', chinese: '歸因於；把…歸咎於', example: 'Researchers attribute the rise in obesity to sedentary lifestyles.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'commence', pos: 'verb', pronunciation: 'kəˈmens', definition: 'To begin; to start something formally.', chinese: '開始；正式開始', example: 'Construction will commence next spring.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'comprise', pos: 'verb', pronunciation: 'kəmˈpraɪz', definition: 'To consist of; to be made up of.', chinese: '由…組成；包含', example: 'The committee comprises representatives from twelve nations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'conducive', pos: 'adjective', pronunciation: 'kənˈdjuːsɪv', definition: 'Making a certain situation or outcome likely or possible.', chinese: '有利於…的；促進…的', example: 'A quiet environment is conducive to effective studying.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'constraints', pos: 'noun', pronunciation: 'kənˈstreɪnts', definition: 'Limitations or restrictions on action or behaviour.', chinese: '限制；約束條件', example: 'Budget constraints forced the team to abandon the project.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'controversial', pos: 'adjective', pronunciation: 'ˌkɒntrəˈvɜːʃəl', definition: 'Giving rise to public disagreement or debate.', chinese: '有爭議的；引起爭論的', example: 'Genetic modification of crops remains a controversial topic.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'culminate', pos: 'verb', pronunciation: 'ˈkʌlmɪneɪt', definition: 'To reach a climax or point of highest development.', chinese: '達到頂點；以…告終', example: 'Years of research culminated in a breakthrough vaccine.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'deduce', pos: 'verb', pronunciation: 'dɪˈdjuːs', definition: 'To arrive at a conclusion by reasoning from evidence.', chinese: '推斷；演繹', example: 'From the data, scientists deduced that temperatures were rising.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'detrimental', pos: 'adjective', pronunciation: 'ˌdetrɪˈmentəl', definition: 'Tending to cause harm or damage.', chinese: '有害的；不利的', example: 'Excessive screen time can be detrimental to children\'s development.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'diminish', pos: 'verb', pronunciation: 'dɪˈmɪnɪʃ', definition: 'To make or become less; to reduce in size, importance, or intensity.', chinese: '減少；縮小；削弱', example: 'Funding cuts have diminished the quality of public services.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'elaborate', pos: 'verb', pronunciation: 'ɪˈlæbəreɪt', definition: 'To develop or present a theory or idea in detail.', chinese: '詳細說明；闡述', example: 'The professor asked students to elaborate on their arguments.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'empirical', pos: 'adjective', pronunciation: 'ɪmˈpɪrɪkəl', definition: 'Based on observation or experience rather than theory or logic.', chinese: '以經驗為依據的；實證的', example: 'The study provided empirical evidence for the hypothesis.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'facilitate', pos: 'verb', pronunciation: 'fəˈsɪlɪteɪt', definition: 'To make an action or process easier; to enable.', chinese: '促進；使便利；幫助', example: 'Technology can facilitate communication across continents.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'fundamental', pos: 'adjective', pronunciation: 'ˌfʌndəˈmentəl', definition: 'Forming a necessary base or core; of central importance.', chinese: '基本的；根本的；至關重要的', example: 'Access to clean water is a fundamental human right.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'generate', pos: 'verb', pronunciation: 'ˈdʒenəreɪt', definition: 'To produce or create something, especially energy or income.', chinese: '產生；創造；發電', example: 'Solar panels generate electricity from sunlight.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'hypothesis', pos: 'noun', pronunciation: 'haɪˈpɒθəsɪs', definition: 'A proposed explanation made on the basis of limited evidence, as a starting point for further investigation.', chinese: '假設；假說', example: 'The scientist tested her hypothesis with a series of controlled experiments.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'implicate', pos: 'verb', pronunciation: 'ˈɪmplɪkeɪt', definition: 'To show someone or something to be involved in a problem or crime.', chinese: '牽連；暗示；涉及', example: 'New evidence implicated industrial waste in the river contamination.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'inevitable', pos: 'adjective', pronunciation: 'ɪnˈevɪtəbl', definition: 'Certain to happen; unable to be avoided or prevented.', chinese: '不可避免的；必然發生的', example: 'Urbanisation is an inevitable consequence of economic growth.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'infrastructure', pos: 'noun', pronunciation: 'ˈɪnfrəstrʌktʃər', definition: 'The basic physical and organisational structures needed for society to function.', chinese: '基礎設施；基礎建設', example: 'Developing nations urgently need investment in transport infrastructure.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'mitigate', pos: 'verb', pronunciation: 'ˈmɪtɪɡeɪt', definition: 'To make less severe, serious, or painful; to lessen.', chinese: '緩解；減輕；降低（風險）', example: 'Planting trees helps mitigate the effects of climate change.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'notion', pos: 'noun', pronunciation: 'ˈnəʊʃən', definition: 'A concept or belief; an idea or opinion.', chinese: '概念；觀念；想法', example: 'The notion that hard work guarantees success is widely debated.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'predominantly', pos: 'adverb', pronunciation: 'prɪˈdɒmɪnəntli', definition: 'Mainly; for the most part.', chinese: '主要地；占主導地位地', example: 'The workforce is predominantly female in that sector.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'proliferate', pos: 'verb', pronunciation: 'prəˈlɪfəreɪt', definition: 'To increase rapidly in number; to multiply.', chinese: '激增；迅速擴散；繁殖', example: 'Social media platforms have proliferated over the past decade.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'scope', pos: 'noun', pronunciation: 'skəʊp', definition: 'The extent of the area or subject matter that something deals with.', chinese: '範圍；範疇；視野', example: 'The scope of the investigation was broadened after new evidence emerged.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'substantial', pos: 'adjective', pronunciation: 'səbˈstænʃəl', definition: 'Of considerable importance, size, or worth.', chinese: '大量的；相當大的；重要的', example: 'The charity received a substantial donation from an anonymous benefactor.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'sustainable', pos: 'adjective', pronunciation: 'səˈsteɪnəbl', definition: 'Able to be maintained at a certain rate or level without depleting natural resources.', chinese: '可持續的；可維持的', example: 'Sustainable farming practices reduce environmental impact.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'undermine', pos: 'verb', pronunciation: 'ˌʌndəˈmaɪn', definition: 'To erode the base or foundation of something; to weaken gradually.', chinese: '破壞；逐漸削弱', example: 'Corruption undermines public trust in government institutions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'abundance', pos: 'noun', pronunciation: 'əˈbʌndəns', definition: 'A very large quantity of something; more than enough.', chinese: '豐富；大量；充裕', example: 'The region has an abundance of natural resources.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'acknowledge', pos: 'verb', pronunciation: 'əkˈnɒlɪdʒ', definition: 'To accept or admit the existence or truth of something.', chinese: '承認；確認；致謝', example: 'The report acknowledges that poverty remains a serious challenge.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'adopt', pos: 'verb', pronunciation: 'əˈdɒpt', definition: 'To take up or start using a plan, idea, or method.', chinese: '採用；採納；收養', example: 'Many countries have adopted stricter environmental regulations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'adverse', pos: 'adjective', pronunciation: 'ˈædvɜːs', definition: 'Preventing success or development; harmful or unfavourable.', chinese: '不利的；有害的；逆向的', example: 'The drought had an adverse effect on crop yields.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'advocate', pos: 'verb', pronunciation: 'ˈædvəkeɪt', definition: 'To publicly recommend or support a particular cause or policy.', chinese: '提倡；擁護；主張', example: 'Environmental groups advocate for a shift to renewable energy.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'alleviate', pos: 'verb', pronunciation: 'əˈliːvieɪt', definition: 'To make suffering, deficiency, or a problem less severe.', chinese: '減輕；緩和；緩解', example: 'New policies were introduced to alleviate urban poverty.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'apparent', pos: 'adjective', pronunciation: 'əˈpærənt', definition: 'Clearly visible or understood; obvious.', chinese: '明顯的；表面上的', example: 'It became apparent that the project would exceed its budget.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'augment', pos: 'verb', pronunciation: 'ɔːɡˈment', definition: 'To make something greater by adding to it; to increase.', chinese: '增加；擴大；增強', example: 'The university augmented its library with thousands of digital resources.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'coherent', pos: 'adjective', pronunciation: 'kəʊˈhɪərənt', definition: 'Logical and consistent; forming a unified whole.', chinese: '連貫的；一致的；有條理的', example: 'A coherent argument is essential in IELTS writing tasks.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'compelling', pos: 'adjective', pronunciation: 'kəmˈpelɪŋ', definition: 'Evoking interest, attention, or admiration in a powerfully irresistible way.', chinese: '引人注目的；有說服力的；不可抗拒的', example: 'She presented a compelling case for reforming the tax system.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'complexity', pos: 'noun', pronunciation: 'kəmˈpleksəti', definition: 'The state of having many parts that are hard to understand or find answers to.', chinese: '複雜性；複雜程度', example: 'The complexity of climate change requires interdisciplinary solutions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'concede', pos: 'verb', pronunciation: 'kənˈsiːd', definition: 'To admit that something is true or valid after first denying it.', chinese: '承認；讓步；退讓', example: 'The government conceded that the policy had failed.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'consequence', pos: 'noun', pronunciation: 'ˈkɒnsɪkwəns', definition: 'A result or effect of an action or condition.', chinese: '後果；結果；影響', example: 'Deforestation has severe consequences for biodiversity.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'considerable', pos: 'adjective', pronunciation: 'kənˈsɪdərəbl', definition: 'Notably large in size, extent, or importance.', chinese: '相當大的；值得注意的', example: 'There has been considerable progress in medical research this decade.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'contemporary', pos: 'adjective', pronunciation: 'kənˈtempərəri', definition: 'Living or occurring at the same time; belonging to the present.', chinese: '當代的；現代的；同時代的', example: 'Contemporary society faces unprecedented technological disruption.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'contend', pos: 'verb', pronunciation: 'kənˈtend', definition: 'To assert something as a position in an argument; to compete with others.', chinese: '主張；聲稱；競爭', example: 'Some economists contend that automation will eliminate millions of jobs.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'cope', pos: 'verb', pronunciation: 'kəʊp', definition: 'To deal effectively with something difficult.', chinese: '應對；處理；承受', example: 'Many students struggle to cope with exam pressure.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'crucial', pos: 'adjective', pronunciation: 'ˈkruːʃəl', definition: 'Decisive or critical, especially in the success or failure of something.', chinese: '至關重要的；關鍵的', example: 'Early childhood education is crucial for cognitive development.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'demonstrate', pos: 'verb', pronunciation: 'ˈdemənstreɪt', definition: 'To clearly show the existence or truth of something by giving evidence.', chinese: '證明；展示；示範', example: 'The experiment demonstrated a clear link between diet and health.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'deplete', pos: 'verb', pronunciation: 'dɪˈpliːt', definition: 'To use up a resource to the point of exhaustion.', chinese: '耗盡；大量消耗', example: 'Overfishing has depleted many marine species to critically low levels.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'deteriorate', pos: 'verb', pronunciation: 'dɪˈtɪəriəreɪt', definition: 'To become progressively worse.', chinese: '惡化；衰退；變壞', example: 'Air quality in many cities continues to deteriorate.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'discrepancy', pos: 'noun', pronunciation: 'dɪˈskrepənsi', definition: 'A lack of compatibility or similarity between two or more facts.', chinese: '差異；不一致；出入', example: 'There is a clear discrepancy between the official statistics and reality.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'disparity', pos: 'noun', pronunciation: 'dɪˈspærəti', definition: 'A great difference between things, often relating to fairness or equality.', chinese: '差距；不平等；懸殊', example: 'The income disparity between rich and poor has widened globally.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'dominate', pos: 'verb', pronunciation: 'ˈdɒmɪneɪt', definition: 'To have a commanding influence or control over; to be the most important.', chinese: '主導；支配；佔優勢', example: 'A few large corporations dominate the global technology market.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'drawback', pos: 'noun', pronunciation: 'ˈdrɔːbæk', definition: 'A feature that makes something less useful or desirable; a disadvantage.', chinese: '缺點；不利條件；障礙', example: 'One major drawback of remote work is the lack of social interaction.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'elaborate', pos: 'adjective', pronunciation: 'ɪˈlæbərət', definition: 'Involving many carefully arranged parts; detailed and complicated.', chinese: '精心設計的；複雜的；詳盡的', example: 'The architect designed an elaborate system of ventilation.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'emissions', pos: 'noun', pronunciation: 'ɪˈmɪʃənz', definition: 'The production and discharge of gases or radiation into the atmosphere.', chinese: '排放；排放物（尤指廢氣）', example: 'Carbon emissions must be drastically reduced to limit global warming.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'enhance', pos: 'verb', pronunciation: 'ɪnˈhɑːns', definition: 'To intensify, increase, or further improve the quality or value of something.', chinese: '提升；增強；改善', example: 'Regular exercise can significantly enhance mental wellbeing.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'ensure', pos: 'verb', pronunciation: 'ɪnˈʃʊər', definition: 'To make certain that something will occur or be the case.', chinese: '確保；保證', example: 'Governments must ensure equal access to quality education.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'ethical', pos: 'adjective', pronunciation: 'ˈeθɪkəl', definition: 'Relating to moral principles; morally correct or acceptable.', chinese: '道德的；符合倫理的', example: 'Cloning raises serious ethical questions about human identity.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'exacerbate', pos: 'verb', pronunciation: 'ɪɡˈzæsəbeɪt', definition: 'To make a problem, bad situation, or negative feeling worse.', chinese: '使惡化；加劇；加重', example: 'The heatwave exacerbated the already severe drought conditions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'exploit', pos: 'verb', pronunciation: 'ɪkˈsplɔɪt', definition: 'To make full use of a resource; or to take unfair advantage of someone.', chinese: '利用；開發；剝削', example: 'Corporations have been accused of exploiting cheap labour overseas.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'extent', pos: 'noun', pronunciation: 'ɪkˈstent', definition: 'The area or range covered by something; the degree to which something is the case.', chinese: '程度；範圍；大小', example: 'The full extent of the damage caused by the flood was not known for weeks.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'fluctuate', pos: 'verb', pronunciation: 'ˈflʌktʃueɪt', definition: 'To rise and fall irregularly in number or amount.', chinese: '波動；起伏；變動', example: 'Oil prices fluctuate depending on global supply and demand.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'foster', pos: 'verb', pronunciation: 'ˈfɒstər', definition: 'To encourage or promote the development of something.', chinese: '培養；促進；助長', example: 'Schools should foster creativity alongside academic achievement.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'globalisation', pos: 'noun', pronunciation: 'ˌɡləʊbəlaɪˈzeɪʃən', definition: 'The process by which businesses or organisations develop international influence.', chinese: '全球化', example: 'Globalisation has connected economies but also widened inequalities.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'governance', pos: 'noun', pronunciation: 'ˈɡʌvənəns', definition: 'The action or manner of governing a state, organisation, or people.', chinese: '治理；管理；統治', example: 'Good governance is essential for a stable and prosperous society.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'impact', pos: 'noun', pronunciation: 'ˈɪmpækt', definition: 'A marked effect or influence on a situation or person.', chinese: '影響；衝擊；作用', example: 'The industrial revolution had a profound impact on human civilisation.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'implement', pos: 'verb', pronunciation: 'ˈɪmplɪment', definition: 'To put a plan or decision into effect.', chinese: '實施；執行；落實', example: 'The city council plans to implement new recycling policies next year.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'implication', pos: 'noun', pronunciation: 'ˌɪmplɪˈkeɪʃən', definition: 'A likely consequence or conclusion drawn from something not directly stated.', chinese: '含義；暗示；影響', example: 'The implications of artificial intelligence for employment are far-reaching.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'incentive', pos: 'noun', pronunciation: 'ɪnˈsentɪv', definition: 'A thing that motivates or encourages someone to do something.', chinese: '激勵；誘因；獎勵', example: 'Tax incentives encourage businesses to invest in green technology.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'inequality', pos: 'noun', pronunciation: 'ˌɪnɪˈkwɒləti', definition: 'Difference in size, degree, or circumstances; lack of equality.', chinese: '不平等；不均等', example: 'Economic inequality has grown sharply in many developed nations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'initiative', pos: 'noun', pronunciation: 'ɪˈnɪʃətɪv', definition: 'The ability to assess and take action independently; a new plan or action.', chinese: '主動性；倡議；新舉措', example: 'The government launched a national initiative to improve literacy rates.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'innovation', pos: 'noun', pronunciation: 'ˌɪnəˈveɪʃən', definition: 'The introduction of new methods, ideas, or products.', chinese: '創新；革新；新發明', example: 'Technological innovation is transforming the healthcare industry.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'integrate', pos: 'verb', pronunciation: 'ˈɪntɪɡreɪt', definition: 'To combine parts into a whole; to bring groups into equal participation.', chinese: '整合；融入；使一體化', example: 'It can be difficult for immigrants to integrate into a new culture.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'justify', pos: 'verb', pronunciation: 'ˈdʒʌstɪfaɪ', definition: 'To show or prove to be right or reasonable.', chinese: '證明…正當；為…辯護；使合理化', example: 'The minister struggled to justify the increase in defence spending.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'legislation', pos: 'noun', pronunciation: 'ˌledʒɪˈsleɪʃən', definition: 'Laws considered collectively; the process of making laws.', chinese: '立法；法規；法律', example: 'New legislation was passed to protect consumer data privacy.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'marginalise', pos: 'verb', pronunciation: 'ˈmɑːdʒɪnəlaɪz', definition: 'To treat a person or group as insignificant or peripheral.', chinese: '邊緣化；使處於邊緣', example: 'Indigenous communities have historically been marginalised by mainstream society.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'migration', pos: 'noun', pronunciation: 'maɪˈɡreɪʃən', definition: 'Movement of people or animals to a new area or country.', chinese: '移民；遷徙；移居', example: 'Rural-to-urban migration has accelerated in developing countries.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'monitor', pos: 'verb', pronunciation: 'ˈmɒnɪtər', definition: 'To observe and check the progress or quality of something over time.', chinese: '監測；監控；追蹤', example: 'Scientists closely monitor changes in Arctic ice levels.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'overcome', pos: 'verb', pronunciation: 'ˌəʊvəˈkʌm', definition: 'To succeed in dealing with a problem or difficulty.', chinese: '克服；戰勝；壓倒', example: 'With determination, students can overcome language barriers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'perceive', pos: 'verb', pronunciation: 'pəˈsiːv', definition: 'To become aware of something through the senses; to regard or understand.', chinese: '感知；察覺；認為', example: 'Many people perceive social media as a threat to mental health.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'perspective', pos: 'noun', pronunciation: 'pəˈspektɪv', definition: 'A particular way of considering something; a point of view.', chinese: '觀點；角度；看法', example: 'Studying abroad offers students a global perspective on social issues.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'phenomenon', pos: 'noun', pronunciation: 'fɪˈnɒmɪnən', definition: 'A fact or situation that is observed to exist or happen, especially one whose cause is in question.', chinese: '現象；奇事', example: 'Climate change is a complex global phenomenon with many causes.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'policy', pos: 'noun', pronunciation: 'ˈpɒləsi', definition: 'A course or principle of action adopted by a government or organisation.', chinese: '政策；方針；措施', example: 'The government\'s housing policy has been criticised for failing the poor.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'potential', pos: 'noun', pronunciation: 'pəˈtenʃəl', definition: 'Latent qualities or abilities that may be developed and lead to future success.', chinese: '潛力；可能性；潛能', example: 'Renewable energy has enormous potential to replace fossil fuels.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'prevalent', pos: 'adjective', pronunciation: 'ˈprevələnt', definition: 'Widespread in a particular area or at a particular time.', chinese: '普遍的；盛行的；流行的', example: 'Obesity is increasingly prevalent in high-income countries.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'priority', pos: 'noun', pronunciation: 'praɪˈɒrəti', definition: 'A thing that is regarded as more important than others.', chinese: '優先事項；重點；優先權', example: 'Reducing carbon emissions must be a global priority.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'regulate', pos: 'verb', pronunciation: 'ˈreɡjʊleɪt', definition: 'To control or maintain the rate or speed of a machine or process; to supervise by rules.', chinese: '管制；調節；規範', example: 'Governments must regulate social media platforms more effectively.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'reinforce', pos: 'verb', pronunciation: 'ˌriːɪnˈfɔːs', definition: 'To strengthen or support, especially with additional material or evidence.', chinese: '加強；鞏固；強化', example: 'Positive feedback reinforces good behaviour in children.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'relevant', pos: 'adjective', pronunciation: 'ˈreləvənt', definition: 'Closely connected or appropriate to what is being done or considered.', chinese: '相關的；切題的；有意義的', example: 'Candidates must provide relevant examples to support their answers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'remedy', pos: 'noun', pronunciation: 'ˈremədi', definition: 'A solution to a problem; a medicine or treatment for a disease.', chinese: '解決方法；補救措施；藥物', example: 'Education is often cited as the best remedy for poverty.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'resilience', pos: 'noun', pronunciation: 'rɪˈzɪliəns', definition: 'The capacity to recover quickly from difficulties; toughness.', chinese: '韌性；復原力；適應力', example: 'Communities in disaster-prone areas must build greater resilience.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'significant', pos: 'adjective', pronunciation: 'sɪɡˈnɪfɪkənt', definition: 'Sufficiently great or important to be worthy of attention.', chinese: '顯著的；重要的；有意義的', example: 'There has been a significant increase in global temperatures since 1900.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'simultaneously', pos: 'adverb', pronunciation: 'ˌsɪməlˈteɪniəsli', definition: 'At the same time.', chinese: '同時地；同步地', example: 'The software can process multiple requests simultaneously.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'skeptical', pos: 'adjective', pronunciation: 'ˈskeptɪkəl', definition: 'Not easily convinced; having doubts or reservations.', chinese: '持懷疑態度的；多疑的', example: 'Many scientists are skeptical about the long-term viability of nuclear fusion.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'subsequently', pos: 'adverb', pronunciation: 'ˈsʌbsɪkwəntli', definition: 'Coming after or as a result of something; afterwards.', chinese: '隨後；其後；因此', example: 'The data was collected and subsequently analysed by a team of researchers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'supplement', pos: 'verb', pronunciation: 'ˈsʌplɪment', definition: 'To add something extra to complete or enhance.', chinese: '補充；增補；彌補', example: 'Many students supplement their income by working part-time.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'tackle', pos: 'verb', pronunciation: 'ˈtækəl', definition: 'To make determined efforts to deal with a problem.', chinese: '應對；處理；解決（問題）', example: 'Governments worldwide need to tackle the issue of plastic pollution.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'transition', pos: 'noun', pronunciation: 'trænˈzɪʃən', definition: 'The process or period of changing from one state or condition to another.', chinese: '過渡；轉變；轉型', example: 'The transition from fossil fuels to renewable energy will take decades.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'trend', pos: 'noun', pronunciation: 'trend', definition: 'A general direction in which something is developing or changing.', chinese: '趨勢；潮流；走向', example: 'There is a growing trend towards plant-based diets in Western countries.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'valid', pos: 'adjective', pronunciation: 'ˈvælɪd', definition: 'Having a sound basis in logic or fact; legally or officially acceptable.', chinese: '有效的；合理的；站得住腳的', example: 'Both sides of the debate present valid arguments.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'viable', pos: 'adjective', pronunciation: 'ˈvaɪəbl', definition: 'Capable of working successfully; feasible.', chinese: '可行的；可存活的；切實可行的', example: 'Solar energy is now a commercially viable alternative to coal.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'widespread', pos: 'adjective', pronunciation: 'ˈwaɪdspred', definition: 'Found or distributed over a large area or number of people.', chinese: '廣泛的；普遍的；大規模的', example: 'There is widespread concern about the impact of social media on teenagers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'prosperity', pos: 'noun', pronunciation: 'prɒˈsperəti', definition: 'The state of being successful and having a lot of money.', chinese: '繁榮；興旺；昌盛', example: 'Economic prosperity does not always lead to greater happiness.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'burgeoning', pos: 'adjective', pronunciation: 'ˈbɜːdʒənɪŋ', definition: 'Beginning to grow or increase rapidly; flourishing.', chinese: '迅速發展的；蓬勃興起的', example: 'There is a burgeoning demand for online education platforms.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'retain', pos: 'verb', pronunciation: 'rɪˈteɪn', definition: 'To keep or continue to have something.', chinese: '保留；保持；維持', example: 'Companies struggle to retain talented employees in a competitive market.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'conserve', pos: 'verb', pronunciation: 'kənˈsɜːv', definition: 'To protect something and prevent it from being changed or destroyed.', chinese: '保存；保護；節省', example: 'People are encouraged to conserve water during the dry season.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'coincide', pos: 'verb', pronunciation: 'ˌkəʊɪnˈsaɪd', definition: 'To happen at the same time; to match or agree with something.', chinese: '同時發生；與…相符', example: 'The festival coincides with the peak tourist season.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'accumulate', pos: 'verb', pronunciation: 'əˈkjuːmjʊleɪt', definition: 'To gradually increase in number or quantity over time.', chinese: '累積；積聚', example: 'Household debts can accumulate quickly if not managed carefully.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'commuter', pos: 'noun', pronunciation: 'kəˈmjuːtər', definition: 'A person who regularly travels some distance to work.', chinese: '通勤者；上下班往返的人', example: 'Many commuters spend hours stuck in traffic every day.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'congestion', pos: 'noun', pronunciation: 'kənˈdʒestʃən', definition: 'The state of being crowded and full of traffic or people.', chinese: '擁擠；堵塞', example: 'Road congestion has become a serious problem in major cities.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'contaminated', pos: 'adjective', pronunciation: 'kənˈtæmɪneɪtɪd', definition: 'Made impure by exposure to or addition of a poisonous or polluting substance.', chinese: '受污染的；被弄髒的', example: 'Many villages rely on contaminated water sources.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'diversify', pos: 'verb', pronunciation: 'daɪˈvɜːsɪfaɪ', definition: 'To develop a wider range of products, interests, or skills.', chinese: '多樣化；使多元化', example: 'Farmers are encouraged to diversify their crops to reduce risk.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'arid', pos: 'adjective', pronunciation: 'ˈærɪd', definition: 'Having little or no rain; too dry to support vegetation.', chinese: '乾旱的；貧瘠的', example: 'Only a few plants can survive in such an arid climate.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'fertile', pos: 'adjective', pronunciation: 'ˈfɜːtaɪl', definition: 'Able to produce good crops or a lot of new ideas.', chinese: '肥沃的；多產的', example: 'The river valley is one of the most fertile regions in the country.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'inefficient', pos: 'adjective', pronunciation: 'ˌɪnɪˈfɪʃənt', definition: 'Not achieving maximum productivity; wasting time or resources.', chinese: '低效率的；無效率的', example: 'An inefficient public transport system discourages people from using it.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'lucrative', pos: 'adjective', pronunciation: 'ˈluːkrətɪv', definition: 'Producing a lot of money; profitable.', chinese: '賺錢的；有利可圖的', example: 'Working in the oil industry can be extremely lucrative.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'outskirts', pos: 'noun', pronunciation: 'ˈaʊtskɜːts', definition: 'The outer parts of a town or city.', chinese: '郊區；市郊', example: 'Many young families choose to live on the outskirts of the city.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'remuneration', pos: 'noun', pronunciation: 'rɪˌmjuːnəˈreɪʃən', definition: 'Money paid for work or a service; salary.', chinese: '報酬；薪酬；酬勞', example: 'Teachers often complain that their remuneration does not reflect their workload.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'sceptical', pos: 'adjective', pronunciation: 'ˈskeptɪkəl', definition: 'Having doubts that something is true or will happen.', chinese: '懷疑的；將信將疑的', example: 'Some citizens are sceptical about the effectiveness of the new law.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'allocate', pos: 'verb', pronunciation: '', definition: 'To distribute resources or duties for a specific purpose.', chinese: '分配；撥給', example: 'The government allocated substantial funds to renewable energy research.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'ambiguous', pos: 'adjective', definition: 'Open to more than one interpretation; not having one obvious meaning.', chinese: '模稜兩可的；含糊的', example: 'The instructions were ambiguous, leading to confusion among students.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'assess', pos: 'verb', definition: 'To evaluate or estimate the nature, quality, or ability of something.', chinese: '評估；評定', example: 'Educators must assess students\' progress regularly.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'attribute', pos: 'verb', definition: 'To regard something as being caused by a particular factor.', chinese: '歸因於；把…歸咎於', example: 'Researchers attribute the rise in obesity to sedentary lifestyles.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'commence', pos: 'verb', definition: 'To begin; to start something formally.', chinese: '開始；正式開始', example: 'Construction will commence next spring.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'comprise', pos: 'verb', definition: 'To consist of; to be made up of.', chinese: '由…組成；包含', example: 'The committee comprises representatives from twelve nations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'conducive', pos: 'adjective', definition: 'Making a certain situation or outcome likely or possible.', chinese: '有利於…的；促進…的', example: 'A quiet environment is conducive to effective studying.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'constraints', pos: 'noun', definition: 'Limitations or restrictions on action or behaviour.', chinese: '限制；約束條件', example: 'Budget constraints forced the team to abandon the project.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'controversial', pos: 'adjective', definition: 'Giving rise to public disagreement or debate.', chinese: '有爭議的；引起爭論的', example: 'Genetic modification of crops remains a controversial topic.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'culminate', pos: 'verb', definition: 'To reach a climax or point of highest development.', chinese: '達到頂點；以…告終', example: 'Years of research culminated in a breakthrough vaccine.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'deduce', pos: 'verb', definition: 'To arrive at a conclusion by reasoning from evidence.', chinese: '推斷；演繹', example: 'From the data, scientists deduced that temperatures were rising.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'detrimental', pos: 'adjective', definition: 'Tending to cause harm or damage.', chinese: '有害的；不利的', example: 'Excessive screen time can be detrimental to children\'s development.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'diminish', pos: 'verb', definition: 'To make or become less; to reduce in size, importance, or intensity.', chinese: '減少；縮小；削弱', example: 'Funding cuts have diminished the quality of public services.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'elaborate', pos: 'verb', definition: 'To develop or present a theory or idea in detail.', chinese: '詳細說明；闡述', example: 'The professor asked students to elaborate on their arguments.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'empirical', pos: 'adjective', definition: 'Based on observation or experience rather than theory or logic.', chinese: '以經驗為依據的；實證的', example: 'The study provided empirical evidence for the hypothesis.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'facilitate', pos: 'verb', definition: 'To make an action or process easier; to enable.', chinese: '促進；使便利；幫助', example: 'Technology can facilitate communication across continents.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'fundamental', pos: 'adjective', definition: 'Forming a necessary base or core; of central importance.', chinese: '基本的；根本的；至關重要的', example: 'Access to clean water is a fundamental human right.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'generate', pos: 'verb', definition: 'To produce or create something, especially energy or income.', chinese: '產生；創造；發電', example: 'Solar panels generate electricity from sunlight.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'hypothesis', pos: 'noun', definition: 'A proposed explanation made on the basis of limited evidence, as a starting point for further investigation.', chinese: '假設；假說', example: 'The scientist tested her hypothesis with a series of controlled experiments.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'implicate', pos: 'verb', definition: 'To show someone or something to be involved in a problem or crime.', chinese: '牽連；暗示；涉及', example: 'New evidence implicated industrial waste in the river contamination.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'inevitable', pos: 'adjective', definition: 'Certain to happen; unable to be avoided or prevented.', chinese: '不可避免的；必然發生的', example: 'Urbanisation is an inevitable consequence of economic growth.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'infrastructure', pos: 'noun', definition: 'The basic physical and organisational structures needed for society to function.', chinese: '基礎設施；基礎建設', example: 'Developing nations urgently need investment in transport infrastructure.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'mitigate', pos: 'verb', definition: 'To make less severe, serious, or painful; to lessen.', chinese: '緩解；減輕；降低（風險）', example: 'Planting trees helps mitigate the effects of climate change.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'notion', pos: 'noun', definition: 'A concept or belief; an idea or opinion.', chinese: '概念；觀念；想法', example: 'The notion that hard work guarantees success is widely debated.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'predominantly', pos: 'adverb', definition: 'Mainly; for the most part.', chinese: '主要地；占主導地位地', example: 'The workforce is predominantly female in that sector.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'proliferate', pos: 'verb', definition: 'To increase rapidly in number; to multiply.', chinese: '激增；迅速擴散；繁殖', example: 'Social media platforms have proliferated over the past decade.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'scope', pos: 'noun', definition: 'The extent of the area or subject matter that something deals with.', chinese: '範圍；範疇；視野', example: 'The scope of the investigation was broadened after new evidence emerged.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'substantial', pos: 'adjective', definition: 'Of considerable importance, size, or worth.', chinese: '大量的；相當大的；重要的', example: 'The charity received a substantial donation from an anonymous benefactor.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'sustainable', pos: 'adjective', definition: 'Able to be maintained at a certain rate or level without depleting natural resources.', chinese: '可持續的；可維持的', example: 'Sustainable farming practices reduce environmental impact.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'undermine', pos: 'verb', definition: 'To erode the base or foundation of something; to weaken gradually.', chinese: '破壞；逐漸削弱', example: 'Corruption undermines public trust in government institutions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'abundance', pos: 'noun', definition: 'A very large quantity of something; more than enough.', chinese: '豐富；大量；充裕', example: 'The region has an abundance of natural resources.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'acknowledge', pos: 'verb', definition: 'To accept or admit the existence or truth of something.', chinese: '承認；確認；致謝', example: 'The report acknowledges that poverty remains a serious challenge.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'adopt', pos: 'verb', definition: 'To take up or start using a plan, idea, or method.', chinese: '採用；採納；收養', example: 'Many countries have adopted stricter environmental regulations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'adverse', pos: 'adjective', definition: 'Preventing success or development; harmful or unfavourable.', chinese: '不利的；有害的；逆向的', example: 'The drought had an adverse effect on crop yields.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'advocate', pos: 'verb', definition: 'To publicly recommend or support a particular cause or policy.', chinese: '提倡；擁護；主張', example: 'Environmental groups advocate for a shift to renewable energy.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'alleviate', pos: 'verb', definition: 'To make suffering, deficiency, or a problem less severe.', chinese: '減輕；緩和；緩解', example: 'New policies were introduced to alleviate urban poverty.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'apparent', pos: 'adjective', definition: 'Clearly visible or understood; obvious.', chinese: '明顯的；表面上的', example: 'It became apparent that the project would exceed its budget.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'augment', pos: 'verb', definition: 'To make something greater by adding to it; to increase.', chinese: '增加；擴大；增強', example: 'The university augmented its library with thousands of digital resources.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'coherent', pos: 'adjective', definition: 'Logical and consistent; forming a unified whole.', chinese: '連貫的；一致的；有條理的', example: 'A coherent argument is essential in IELTS writing tasks.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'compelling', pos: 'adjective', definition: 'Evoking interest, attention, or admiration in a powerfully irresistible way.', chinese: '引人注目的；有說服力的；不可抗拒的', example: 'She presented a compelling case for reforming the tax system.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'complexity', pos: 'noun', definition: 'The state of having many parts that are hard to understand or find answers to.', chinese: '複雜性；複雜程度', example: 'The complexity of climate change requires interdisciplinary solutions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'concede', pos: 'verb', definition: 'To admit that something is true or valid after first denying it.', chinese: '承認；讓步；退讓', example: 'The government conceded that the policy had failed.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'consequence', pos: 'noun', definition: 'A result or effect of an action or condition.', chinese: '後果；結果；影響', example: 'Deforestation has severe consequences for biodiversity.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'considerable', pos: 'adjective', definition: 'Notably large in size, extent, or importance.', chinese: '相當大的；值得注意的', example: 'There has been considerable progress in medical research this decade.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'contemporary', pos: 'adjective', definition: 'Living or occurring at the same time; belonging to the present.', chinese: '當代的；現代的；同時代的', example: 'Contemporary society faces unprecedented technological disruption.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'contend', pos: 'verb', definition: 'To assert something as a position in an argument; to compete with others.', chinese: '主張；聲稱；競爭', example: 'Some economists contend that automation will eliminate millions of jobs.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'cope', pos: 'verb', definition: 'To deal effectively with something difficult.', chinese: '應對；處理；承受', example: 'Many students struggle to cope with exam pressure.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'crucial', pos: 'adjective', definition: 'Decisive or critical, especially in the success or failure of something.', chinese: '至關重要的；關鍵的', example: 'Early childhood education is crucial for cognitive development.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'demonstrate', pos: 'verb', definition: 'To clearly show the existence or truth of something by giving evidence.', chinese: '證明；展示；示範', example: 'The experiment demonstrated a clear link between diet and health.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'deplete', pos: 'verb', definition: 'To use up a resource to the point of exhaustion.', chinese: '耗盡；大量消耗', example: 'Overfishing has depleted many marine species to critically low levels.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'deteriorate', pos: 'verb', definition: 'To become progressively worse.', chinese: '惡化；衰退；變壞', example: 'Air quality in many cities continues to deteriorate.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'discrepancy', pos: 'noun', definition: 'A lack of compatibility or similarity between two or more facts.', chinese: '差異；不一致；出入', example: 'There is a clear discrepancy between the official statistics and reality.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'disparity', pos: 'noun', definition: 'A great difference between things, often relating to fairness or equality.', chinese: '差距；不平等；懸殊', example: 'The income disparity between rich and poor has widened globally.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'dominate', pos: 'verb', definition: 'To have a commanding influence or control over; to be the most important.', chinese: '主導；支配；佔優勢', example: 'A few large corporations dominate the global technology market.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'drawback', pos: 'noun', definition: 'A feature that makes something less useful or desirable; a disadvantage.', chinese: '缺點；不利條件；障礙', example: 'One major drawback of remote work is the lack of social interaction.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'elaborate', pos: 'adjective', definition: 'Involving many carefully arranged parts; detailed and complicated.', chinese: '精心設計的；複雜的；詳盡的', example: 'The architect designed an elaborate system of ventilation.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'emissions', pos: 'noun', definition: 'The production and discharge of gases or radiation into the atmosphere.', chinese: '排放；排放物（尤指廢氣）', example: 'Carbon emissions must be drastically reduced to limit global warming.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'enhance', pos: 'verb', definition: 'To intensify, increase, or further improve the quality or value of something.', chinese: '提升；增強；改善', example: 'Regular exercise can significantly enhance mental wellbeing.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'ensure', pos: 'verb', definition: 'To make certain that something will occur or be the case.', chinese: '確保；保證', example: 'Governments must ensure equal access to quality education.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'ethical', pos: 'adjective', definition: 'Relating to moral principles; morally correct or acceptable.', chinese: '道德的；符合倫理的', example: 'Cloning raises serious ethical questions about human identity.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'exacerbate', pos: 'verb', definition: 'To make a problem, bad situation, or negative feeling worse.', chinese: '使惡化；加劇；加重', example: 'The heatwave exacerbated the already severe drought conditions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'exploit', pos: 'verb', definition: 'To make full use of a resource; or to take unfair advantage of someone.', chinese: '利用；開發；剝削', example: 'Corporations have been accused of exploiting cheap labour overseas.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'extent', pos: 'noun', definition: 'The area or range covered by something; the degree to which something is the case.', chinese: '程度；範圍；大小', example: 'The full extent of the damage caused by the flood was not known for weeks.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'fluctuate', pos: 'verb', definition: 'To rise and fall irregularly in number or amount.', chinese: '波動；起伏；變動', example: 'Oil prices fluctuate depending on global supply and demand.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'foster', pos: 'verb', definition: 'To encourage or promote the development of something.', chinese: '培養；促進；助長', example: 'Schools should foster creativity alongside academic achievement.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'globalisation', pos: 'noun', definition: 'The process by which businesses or organisations develop international influence.', chinese: '全球化', example: 'Globalisation has connected economies but also widened inequalities.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'governance', pos: 'noun', definition: 'The action or manner of governing a state, organisation, or people.', chinese: '治理；管理；統治', example: 'Good governance is essential for a stable and prosperous society.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'impact', pos: 'noun', definition: 'A marked effect or influence on a situation or person.', chinese: '影響；衝擊；作用', example: 'The industrial revolution had a profound impact on human civilisation.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'implement', pos: 'verb', definition: 'To put a plan or decision into effect.', chinese: '實施；執行；落實', example: 'The city council plans to implement new recycling policies next year.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'implication', pos: 'noun', definition: 'A likely consequence or conclusion drawn from something not directly stated.', chinese: '含義；暗示；影響', example: 'The implications of artificial intelligence for employment are far-reaching.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'incentive', pos: 'noun', definition: 'A thing that motivates or encourages someone to do something.', chinese: '激勵；誘因；獎勵', example: 'Tax incentives encourage businesses to invest in green technology.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'inequality', pos: 'noun', definition: 'Difference in size, degree, or circumstances; lack of equality.', chinese: '不平等；不均等', example: 'Economic inequality has grown sharply in many developed nations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'initiative', pos: 'noun', definition: 'The ability to assess and take action independently; a new plan or action.', chinese: '主動性；倡議；新舉措', example: 'The government launched a national initiative to improve literacy rates.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'innovation', pos: 'noun', definition: 'The introduction of new methods, ideas, or products.', chinese: '創新；革新；新發明', example: 'Technological innovation is transforming the healthcare industry.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'integrate', pos: 'verb', definition: 'To combine parts into a whole; to bring groups into equal participation.', chinese: '整合；融入；使一體化', example: 'It can be difficult for immigrants to integrate into a new culture.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'justify', pos: 'verb', definition: 'To show or prove to be right or reasonable.', chinese: '證明…正當；為…辯護；使合理化', example: 'The minister struggled to justify the increase in defence spending.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'legislation', pos: 'noun', definition: 'Laws considered collectively; the process of making laws.', chinese: '立法；法規；法律', example: 'New legislation was passed to protect consumer data privacy.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'marginalise', pos: 'verb', definition: 'To treat a person or group as insignificant or peripheral.', chinese: '邊緣化；使處於邊緣', example: 'Indigenous communities have historically been marginalised by mainstream society.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'migration', pos: 'noun', definition: 'Movement of people or animals to a new area or country.', chinese: '移民；遷徙；移居', example: 'Rural-to-urban migration has accelerated in developing countries.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'monitor', pos: 'verb', definition: 'To observe and check the progress or quality of something over time.', chinese: '監測；監控；追蹤', example: 'Scientists closely monitor changes in Arctic ice levels.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'overcome', pos: 'verb', definition: 'To succeed in dealing with a problem or difficulty.', chinese: '克服；戰勝；壓倒', example: 'With determination, students can overcome language barriers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'perceive', pos: 'verb', definition: 'To become aware of something through the senses; to regard or understand.', chinese: '感知；察覺；認為', example: 'Many people perceive social media as a threat to mental health.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'perspective', pos: 'noun', definition: 'A particular way of considering something; a point of view.', chinese: '觀點；角度；看法', example: 'Studying abroad offers students a global perspective on social issues.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'phenomenon', pos: 'noun', definition: 'A fact or situation that is observed to exist or happen, especially one whose cause is in question.', chinese: '現象；奇事', example: 'Climate change is a complex global phenomenon with many causes.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'policy', pos: 'noun', definition: 'A course or principle of action adopted by a government or organisation.', chinese: '政策；方針；措施', example: 'The government\'s housing policy has been criticised for failing the poor.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'potential', pos: 'noun', definition: 'Latent qualities or abilities that may be developed and lead to future success.', chinese: '潛力；可能性；潛能', example: 'Renewable energy has enormous potential to replace fossil fuels.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'prevalent', pos: 'adjective', definition: 'Widespread in a particular area or at a particular time.', chinese: '普遍的；盛行的；流行的', example: 'Obesity is increasingly prevalent in high-income countries.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'priority', pos: 'noun', definition: 'A thing that is regarded as more important than others.', chinese: '優先事項；重點；優先權', example: 'Reducing carbon emissions must be a global priority.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'regulate', pos: 'verb', definition: 'To control or maintain the rate or speed of a machine or process; to supervise by rules.', chinese: '管制；調節；規範', example: 'Governments must regulate social media platforms more effectively.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'reinforce', pos: 'verb', definition: 'To strengthen or support, especially with additional material or evidence.', chinese: '加強；鞏固；強化', example: 'Positive feedback reinforces good behaviour in children.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'relevant', pos: 'adjective', definition: 'Closely connected or appropriate to what is being done or considered.', chinese: '相關的；切題的；有意義的', example: 'Candidates must provide relevant examples to support their answers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'remedy', pos: 'noun', definition: 'A solution to a problem; a medicine or treatment for a disease.', chinese: '解決方法；補救措施；藥物', example: 'Education is often cited as the best remedy for poverty.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'resilience', pos: 'noun', definition: 'The capacity to recover quickly from difficulties; toughness.', chinese: '韌性；復原力；適應力', example: 'Communities in disaster-prone areas must build greater resilience.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'significant', pos: 'adjective', definition: 'Sufficiently great or important to be worthy of attention.', chinese: '顯著的；重要的；有意義的', example: 'There has been a significant increase in global temperatures since 1900.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'simultaneously', pos: 'adverb', definition: 'At the same time.', chinese: '同時地；同步地', example: 'The software can process multiple requests simultaneously.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'skeptical', pos: 'adjective', definition: 'Not easily convinced; having doubts or reservations.', chinese: '持懷疑態度的；多疑的', example: 'Many scientists are skeptical about the long-term viability of nuclear fusion.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'subsequently', pos: 'adverb', definition: 'Coming after or as a result of something; afterwards.', chinese: '隨後；其後；因此', example: 'The data was collected and subsequently analysed by a team of researchers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'supplement', pos: 'verb', definition: 'To add something extra to complete or enhance.', chinese: '補充；增補；彌補', example: 'Many students supplement their income by working part-time.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'tackle', pos: 'verb', definition: 'To make determined efforts to deal with a problem.', chinese: '應對；處理；解決（問題）', example: 'Governments worldwide need to tackle the issue of plastic pollution.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'transition', pos: 'noun', definition: 'The process or period of changing from one state or condition to another.', chinese: '過渡；轉變；轉型', example: 'The transition from fossil fuels to renewable energy will take decades.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'trend', pos: 'noun', definition: 'A general direction in which something is developing or changing.', chinese: '趨勢；潮流；走向', example: 'There is a growing trend towards plant-based diets in Western countries.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'valid', pos: 'adjective', definition: 'Having a sound basis in logic or fact; legally or officially acceptable.', chinese: '有效的；合理的；站得住腳的', example: 'Both sides of the debate present valid arguments.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'viable', pos: 'adjective', definition: 'Capable of working successfully; feasible.', chinese: '可行的；可存活的；切實可行的', example: 'Solar energy is now a commercially viable alternative to coal.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'widespread', pos: 'adjective', definition: 'Found or distributed over a large area or number of people.', chinese: '廣泛的；普遍的；大規模的', example: 'There is widespread concern about the impact of social media on teenagers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'prosperity', pos: 'noun', pronunciation: '', definition: 'The state of being successful and having a lot of money.', chinese: '繁榮；興旺；昌盛', example: 'Economic prosperity does not always lead to greater happiness.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'burgeoning', pos: 'adjective', definition: 'Beginning to grow or increase rapidly; flourishing.', chinese: '迅速發展的；蓬勃興起的', example: 'There is a burgeoning demand for online education platforms.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'retain', pos: 'verb', definition: 'To keep or continue to have something.', chinese: '保留；保持；維持', example: 'Companies struggle to retain talented employees in a competitive market.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'conserve', pos: 'verb', definition: 'To protect something and prevent it from being changed or destroyed.', chinese: '保存；保護；節省', example: 'People are encouraged to conserve water during the dry season.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'coincide', pos: 'verb', definition: 'To happen at the same time; to match or agree with something.', chinese: '同時發生；與…相符', example: 'The festival coincides with the peak tourist season.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'accumulate', pos: 'verb', definition: 'To gradually increase in number or quantity over time.', chinese: '累積；積聚', example: 'Household debts can accumulate quickly if not managed carefully.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'allocate', pos: 'verb', definition: 'To decide officially that something should be used for a particular purpose.', chinese: '分配；撥出', example: 'More funds should be allocated to public healthcare.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'commuter', pos: 'noun', definition: 'A person who regularly travels some distance to work.', chinese: '通勤者；上下班往返的人', example: 'Many commuters spend hours stuck in traffic every day.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'congestion', pos: 'noun', definition: 'The state of being crowded and full of traffic or people.', chinese: '擁擠；堵塞', example: 'Road congestion has become a serious problem in major cities.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'contaminated', pos: 'adjective', definition: 'Made impure by exposure to or addition of a poisonous or polluting substance.', chinese: '受污染的；被弄髒的', example: 'Many villages rely on contaminated water sources.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'diversify', pos: 'verb', definition: 'To develop a wider range of products, interests, or skills.', chinese: '多樣化；使多元化', example: 'Farmers are encouraged to diversify their crops to reduce risk.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'arid', pos: 'adjective', definition: 'Having little or no rain; too dry to support vegetation.', chinese: '乾旱的；貧瘠的', example: 'Only a few plants can survive in such an arid climate.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'fertile', pos: 'adjective', definition: 'Able to produce good crops or a lot of new ideas.', chinese: '肥沃的；多產的', example: 'The river valley is one of the most fertile regions in the country.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'inefficient', pos: 'adjective', definition: 'Not achieving maximum productivity; wasting time or resources.', chinese: '低效率的；無效率的', example: 'An inefficient public transport system discourages people from using it.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'lucrative', pos: 'adjective', definition: 'Producing a lot of money; profitable.', chinese: '賺錢的；有利可圖的', example: 'Working in the oil industry can be extremely lucrative.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'outskirts', pos: 'noun', definition: 'The outer parts of a town or city.', chinese: '郊區；市郊', example: 'Many young families choose to live on the outskirts of the city.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'remuneration', pos: 'noun', definition: 'Money paid for work or a service; salary.', chinese: '報酬；薪酬；酬勞', example: 'Teachers often complain that their remuneration does not reflect their workload.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
+    { id: uid(), word: 'sceptical', pos: 'adjective', definition: 'Having doubts that something is true or will happen.', chinese: '懷疑的；將信將疑的', example: 'Some citizens are sceptical about the effectiveness of the new law.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
     { id: uid(), word: 'deprive', pos: 'verb', definition: 'To take something important or necessary away from someone.', chinese: '剝奪；使喪失', example: 'War often deprives children of a stable childhood and education.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'urbanisation', pos: 'noun', pronunciation: 'ˌɜːbənaɪˈzeɪʃən', definition: 'The process by which more and more people move to live in cities.', chinese: '城市化；都市化', example: 'Rapid urbanisation has put enormous pressure on housing and transport systems.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'biodiversity', pos: 'noun', pronunciation: 'ˌbaɪəʊdaɪˈvɜːsəti', definition: 'The variety of plant and animal life in a particular habitat or on Earth.', chinese: '生物多樣性', example: 'Deforestation poses a serious threat to biodiversity in tropical regions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'consumption', pos: 'noun', pronunciation: 'kənˈsʌmpʃən', definition: 'The using up of a resource; the amount of something that is used.', chinese: '消費；消耗；消費量', example: 'Reducing energy consumption is essential to combating climate change.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'affluent', pos: 'adjective', pronunciation: 'ˈæfluənt', definition: 'Having a great deal of wealth; prosperous.', chinese: '富裕的；富足的', example: 'Affluent societies often consume far more resources than developing nations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'automation', pos: 'noun', pronunciation: 'ˌɔːtəˈmeɪʃən', definition: 'The use of machines and technology to perform tasks without human involvement.', chinese: '自動化', example: 'Automation has transformed manufacturing but also displaced many workers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'obesity', pos: 'noun', pronunciation: 'əʊˈbiːsəti', definition: 'The condition of being seriously overweight in a way that is harmful to health.', chinese: '肥胖；過度肥胖', example: 'Rising obesity rates are placing increasing strain on public healthcare systems.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'sedentary', pos: 'adjective', pronunciation: 'ˈsedəntri', definition: 'Involving little physical activity; tending to spend much time seated.', chinese: '久坐的；缺乏運動的', example: 'A sedentary lifestyle is strongly linked to increased risk of heart disease.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'demographic', pos: 'noun', pronunciation: 'ˌdeməˈɡræfɪk', definition: 'A particular sector of a population, defined by shared characteristics such as age or income.', chinese: '人口結構；人口統計特徵', example: 'Advertisers carefully target their campaigns at specific demographic groups.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'subsidy', pos: 'noun', pronunciation: 'ˈsʌbsədi', definition: 'A sum of money granted by the government to support an industry or service.', chinese: '補貼；津貼；補助金', example: 'Government subsidies have made renewable energy more affordable for consumers.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'revenue', pos: 'noun', pronunciation: 'ˈrevənjuː', definition: 'The income generated by a business, government, or organisation.', chinese: '收入；稅收；營業額', example: 'Tourism contributes a significant share of the country\'s annual revenue.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'deficit', pos: 'noun', pronunciation: 'ˈdefɪsɪt', definition: 'The amount by which expenditure exceeds income or resources.', chinese: '赤字；逆差；不足額', example: 'The government has struggled to reduce its growing budget deficit.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'collaborate', pos: 'verb', pronunciation: 'kəˈlæbəreɪt', definition: 'To work jointly with others on a shared project or goal.', chinese: '合作；協作；協力', example: 'Scientists across the world collaborated to develop the vaccine in record time.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'vulnerable', pos: 'adjective', pronunciation: 'ˈvʌlnərəbl', definition: 'Susceptible to harm, attack, or damage; in need of special protection.', chinese: '脆弱的；易受傷害的；弱勢的', example: 'Elderly people and children are particularly vulnerable during heatwaves.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'stereotype', pos: 'noun', pronunciation: 'ˈsteriətaɪp', definition: 'A widely held but oversimplified image or idea of a particular type of person or thing.', chinese: '刻板印象；固定觀念', example: 'The media often reinforces harmful stereotypes about certain social groups.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'discrimination', pos: 'noun', pronunciation: 'dɪˌskrɪmɪˈneɪʃən', definition: 'The unjust treatment of different categories of people, especially on grounds of race or gender.', chinese: '歧視；差別對待', example: 'Legislation has been introduced to prevent discrimination in the workplace.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'transparency', pos: 'noun', pronunciation: 'trænsˈpærənsi', definition: 'The quality of being open and honest; the condition of allowing others to see what is happening.', chinese: '透明度；透明性', example: 'Greater transparency in government spending can help reduce corruption.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'accountability', pos: 'noun', pronunciation: 'əˌkaʊntəˈbɪləti', definition: 'The fact of being responsible for one\'s actions and expected to explain them.', chinese: '問責制；責任制', example: 'Public accountability is fundamental to a functioning democratic system.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'catastrophic', pos: 'adjective', pronunciation: 'ˌkætəˈstrɒfɪk', definition: 'Involving or causing sudden great damage or suffering.', chinese: '災難性的；毀滅性的', example: 'Unchecked climate change could have catastrophic consequences for coastal cities.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'unprecedented', pos: 'adjective', pronunciation: 'ʌnˈpresɪdentɪd', definition: 'Never done or known before; without previous example.', chinese: '前所未有的；空前的', example: 'The pandemic caused unprecedented disruption to global supply chains.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'paramount', pos: 'adjective', pronunciation: 'ˈpærəmaʊnt', definition: 'More important than anything else; supreme.', chinese: '至關重要的；最重要的', example: 'The safety of passengers is paramount in the design of public transport systems.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'indispensable', pos: 'adjective', pronunciation: 'ˌɪndɪˈspensəbl', definition: 'Absolutely necessary and impossible to do without.', chinese: '不可或缺的；必不可少的', example: 'Clean water is indispensable to human survival and public health.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'perpetuate', pos: 'verb', pronunciation: 'pəˈpetʃueɪt', definition: 'To make something continue indefinitely; to preserve or maintain something, especially something harmful.', chinese: '使永久化；延續；助長', example: 'Poor education systems can perpetuate cycles of poverty across generations.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'eradicate', pos: 'verb', pronunciation: 'ɪˈrædɪkeɪt', definition: 'To completely destroy or eliminate something, especially a disease or problem.', chinese: '根除；消滅；徹底消除', example: 'Global health organisations are working to eradicate preventable childhood diseases.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'disseminate', pos: 'verb', pronunciation: 'dɪˈsemɪneɪt', definition: 'To spread information or knowledge widely.', chinese: '傳播；散播；宣傳', example: 'Social media has transformed the speed at which information is disseminated.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'cognitive', pos: 'adjective', pronunciation: 'ˈkɒɡnɪtɪv', definition: 'Relating to the mental processes of perception, memory, thinking, and reasoning.', chinese: '認知的；認知方面的', example: 'Regular reading has been shown to improve cognitive development in children.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'socioeconomic', pos: 'adjective', pronunciation: 'ˌsəʊsiəʊˌiːkəˈnɒmɪk', definition: 'Relating to or concerned with the interaction of social and economic factors.', chinese: '社會經濟的；社經的', example: 'Socioeconomic background continues to influence educational attainment significantly.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'inherent', pos: 'adjective', pronunciation: 'ɪnˈhɪərənt', definition: 'Existing as a natural or essential part of something; built-in.', chinese: '固有的；內在的；與生俱來的', example: 'There are inherent risks in any form of financial investment.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'correlate', pos: 'verb', pronunciation: 'ˈkɒrəleɪt', definition: 'To have a mutual relationship or connection; to show a correlation.', chinese: '相關聯；有相互關係', example: 'Research shows that exercise levels correlate positively with mental wellbeing.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'ecosystem', pos: 'noun', pronunciation: 'ˈiːkəʊsɪstəm', definition: 'A biological community of interacting organisms and their physical environment.', chinese: '生態系統', example: 'Pollution from industrial waste is destroying fragile marine ecosystems.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'sanitation', pos: 'noun', pronunciation: 'ˌsænɪˈteɪʃən', definition: 'Conditions relating to public health, especially the provision of clean water and sewage disposal.', chinese: '環境衛生；公共衛生設施', example: 'Lack of adequate sanitation remains a major cause of disease in many regions.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'curriculum', pos: 'noun', pronunciation: 'kəˈrɪkjʊləm', definition: 'The subjects and educational content that make up a course of study.', chinese: '課程；教學大綱', example: 'Many educators argue that the national curriculum should include digital literacy.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'mortality', pos: 'noun', pronunciation: 'mɔːˈtæləti', definition: 'The state of being subject to death; the number of deaths in a given population.', chinese: '死亡率；必死性', example: 'Improved healthcare has significantly reduced infant mortality rates worldwide.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
-    { id: uid(), word: 'prototype', pos: 'noun', pronunciation: 'ˈprəʊtətaɪp', definition: 'A first model of something from which other forms are developed or copied.', chinese: '原型；雛形；樣機', example: 'Engineers built a prototype of the electric vehicle to test its performance.', mastery: 'new', reviews: 0, added: t, tag: 'IELTS' },
     // ── Advanced / Academic ──
     { id: uid(), word: 'ephemeral', pos: 'adjective', pronunciation: '', definition: 'Lasting for a very short time; transitory.', chinese: '短暫的；轉瞬即逝的', example: 'Her fame was ephemeral, lasting only a single season.', mastery: 'new', reviews: 0, added: t, tag: 'Advanced' },
     { id: uid(), word: 'perspicacious', pos: 'adjective', definition: 'Having a ready insight into things; shrewd and discerning.', chinese: '敏銳的；有洞察力的', example: 'A perspicacious critic, she saw through the author\'s overwritten style.', mastery: 'new', reviews: 0, added: t, tag: 'Advanced' },
@@ -1421,12 +882,15 @@ function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
+  const nameToKeyword = { words: 'lib', flashcards: 'study', stats: 'prog', captured: 'captured' };
+  const keyword = nameToKeyword[name] || name;
   document.querySelectorAll('.nav-tab').forEach(t => {
-    if (t.textContent.toLowerCase().includes(name === 'words' ? 'lib' : name === 'flashcards' ? 'study' : 'prog'))
-      t.classList.add('active');
+    if (t.textContent.toLowerCase().includes(keyword)) t.classList.add('active');
   });
   if (name === 'flashcards') initFlashcards();
   if (name === 'stats') renderStats();
+  if (name === 'captured') startCapturedPolling();
+  else stopCapturedPolling();
   updateNavCount();
 }
 
@@ -1438,23 +902,20 @@ function updateNavCount() {
 // ─── WORD MANAGER ─────────────────────────────────────────────────────────────
 function addWord() {
   const word = document.getElementById('inp-word').value.trim();
-  if (!word) { alert('Word is required.'); return; }
-  const defs = getDefEntries();
-  if (defs.length === 0) { alert('Please add at least one definition.'); return; }
+  const def  = document.getElementById('inp-def').value.trim();
+  if (!word || !def) { alert('Word and definition are required.'); return; }
+  const pos  = document.getElementById('inp-pos').value;
+  const ex   = document.getElementById('inp-ex').value.trim();
   const chinese = document.getElementById('inp-zh').value.trim();
   const pronunciation = document.getElementById('inp-pron').value.trim();
-  const wordObj = {
-    id: uid(), word, pronunciation,
-    pos: defs[0].pos, definition: defs[0].definition, example: defs[0].example,
-    chinese, mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine'
-  };
-  if (defs.length > 1) wordObj.definitions = defs;
-  words.unshift(wordObj);
+  // 使用者自己新增的單詞，統一標記為 My words
+  words.unshift({ id: uid(), word, pos, pronunciation, definition: def, chinese, example: ex, mastery: 'new', reviews: 0, added: Date.now(), tag: 'Mine' });
   saveData();
   document.getElementById('inp-word').value = '';
   document.getElementById('inp-pron').value = '';
+  document.getElementById('inp-def').value = '';
   document.getElementById('inp-zh').value = '';
-  initDefEntries();
+  document.getElementById('inp-pos').value = '';
   renderWordList();
   updateNavCount();
 }
@@ -1478,39 +939,26 @@ function renderWordList() {
     return;
   }
 
-  list.innerHTML = filtered.map(w => {
-    const defs = (w.definitions && w.definitions.length > 1) ? w.definitions : null;
-    const defsHtml = defs
-      ? defs.map(d => `
-          <div class="def-block">
-            <span class="word-card-pos">${d.pos}</span>
-            <div class="word-card-def">${d.definition}</div>
-            ${d.example ? `<div class="word-card-example">${d.example}</div>` : ''}
-          </div>`).join('')
-      : `<div class="word-card-def" style="margin-top:4px;">${w.definition}</div>
-         ${w.example ? `<div class="word-card-example">${w.example}</div>` : ''}`;
-    const singlePos = !defs && w.pos ? `<span class="word-card-pos" style="margin-left:8px;">${w.pos}</span>` : '';
-    return `
+  list.innerHTML = filtered.map(w => `
     <div class="word-card" id="wc-${w.id}">
-      <div class="word-card-body" style="min-width:0;">
-        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;">
-          <span class="word-card-word">${w.word}</span>${singlePos}
+      <div class="word-card-body">
+        <div>
+          <span class="word-card-word">${w.word}</span>
+          ${w.pos ? `<span class="word-card-pos">${w.pos}</span>` : ''}
         </div>
-        ${w.pronunciation ? `<div style="font-size:12px;color:var(--text3);margin-top:1px;">/${w.pronunciation}/</div>` : ''}
-        ${w.chinese ? `<div style="font-size:13px;color:var(--accent);font-weight:500;margin-top:3px;">${w.chinese}</div>` : ''}
-        ${defsHtml}
+        ${w.pronunciation ? `<div style="font-size:12px;color:var(--text3);margin-top:2px;">/${w.pronunciation}/</div>` : ''}
+        ${w.chinese ? `<div style="font-size:13px;color:var(--accent);font-weight:500;margin-top:3px;letter-spacing:0.02em">${w.chinese}</div>` : ''}
+        <div class="word-card-def">${w.definition}</div>
+        ${w.example ? `<div class="word-card-example">${w.example}</div>` : ''}
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
-        <div class="word-card-actions">
-          <button class="icon-btn" onclick="speakWord('${w.word}')" title="Pronounce">🔊</button>
-          <button class="icon-btn" onclick="openEdit('${w.id}')" title="Edit">✎</button>
-          <button class="icon-btn del" onclick="deleteWord('${w.id}')" title="Delete">✕</button>
-        </div>
-        <span class="mastery-badge m-${w.mastery}">${w.mastery}</span>
-        ${w.tag ? `<span class="mastery-badge" style="background:#f0eefb;color:var(--accent3);border:1px solid #cdc8ef">${w.tag}</span>` : ''}
+      <span class="mastery-badge m-${w.mastery}">${w.mastery}</span>
+      ${w.tag ? `<span class="mastery-badge" style="background:#f0eefb;color:var(--accent3);border:1px solid #cdc8ef">${w.tag}</span>` : ''}
+      <div class="word-card-actions">
+        <button class="icon-btn" onclick="openEdit('${w.id}')" title="Edit">✎</button>
+        <button class="icon-btn del" onclick="deleteWord('${w.id}')" title="Delete">✕</button>
       </div>
-    </div>`;
-  }).join('');
+    </div>
+  `).join('');
 }
 
 function deleteWord(id) {
@@ -1548,9 +996,6 @@ function saveEdit() {
 document.getElementById('edit-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
-document.getElementById('related-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeRelatedModal();
-});
 
 // ─── FLASHCARDS ───────────────────────────────────────────────────────────────
 function initFlashcards() {
@@ -1580,18 +1025,6 @@ function renderFlashcard() {
 
   const w = fcQueue[fcIndex];
   const progress = (fcIndex / fcQueue.length) * 100;
-  const fcDefs = (w.definitions && w.definitions.length > 1) ? w.definitions : null;
-  const fcBackDefs = fcDefs
-    ? fcDefs.map(d => `
-        <div style="margin-bottom:8px;">
-          <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);background:var(--surface2);border-radius:4px;padding:1px 5px;">${d.pos}</span>
-          <div class="fc-def" style="margin-top:3px;">${d.definition}</div>
-          ${d.example ? `<div class="fc-example">"${d.example}"</div>` : ''}
-        </div>`).join('')
-    : `<div class="fc-def">${w.definition}</div>${w.example ? `<div class="fc-example">"${w.example}"</div>` : ''}`;
-  const fcFrontPos = fcDefs
-    ? fcDefs.map(d => `<span class="fc-pos">${d.pos}</span>`).join(' ')
-    : (w.pos ? `<div class="fc-pos">${w.pos}</div>` : '');
 
   container.innerHTML = `
     <div class="fc-progress-bar"><div class="fc-progress-fill" style="width:${progress}%"></div></div>
@@ -1599,21 +1032,15 @@ function renderFlashcard() {
       <div class="fc-card" id="fc-card">
         <div class="fc-face fc-front">
           <div class="fc-hint">Click to reveal definition</div>
-          <div style="display:flex;align-items:center;gap:10px;justify-content:center;">
-            <div class="fc-word">${w.word}</div>
-            <button class="fc-speak-btn" onclick="event.stopPropagation();speakWord('${w.word}')" title="Pronounce">🔊</button>
-          </div>
+          <div class="fc-word">${w.word}</div>
           ${w.pronunciation ? `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);margin-top:6px;">/${w.pronunciation}/</div>` : ''}
-          ${fcFrontPos}
+          ${w.pos ? `<div class="fc-pos">${w.pos}</div>` : ''}
         </div>
         <div class="fc-face fc-back">
           <div class="fc-hint">Rate your recall</div>
-          <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:4px;">
-            ${w.chinese ? `<div style="font-size:18px;color:var(--accent);font-weight:500;">${w.chinese}</div>` : ''}
-            <button class="fc-speak-btn" onclick="event.stopPropagation();speakWord('${w.word}')" title="Pronounce">🔊</button>
-          </div>
-          ${w.pronunciation ? `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);margin-bottom:10px;">/${w.pronunciation}/</div>` : ''}
-          ${fcBackDefs}
+          ${w.chinese ? `<div style="font-size:18px;color:var(--accent);font-weight:500;margin-bottom:10px">${w.chinese}</div>` : ''}
+          <div class="fc-def">${w.definition}</div>
+          ${w.example ? `<div class="fc-example">"${w.example}"</div>` : ''}
         </div>
       </div>
     </div>
@@ -1626,7 +1053,6 @@ function renderFlashcard() {
     <div class="fc-status">${fcIndex + 1} / ${fcQueue.length}</div>
   `;
   fcFlipped = false;
-  setTimeout(() => speakWord(w.word), 300);
 }
 
 function flipCard() {
@@ -1636,8 +1062,6 @@ function flipCard() {
     fcFlipped = true;
     card.classList.add('flipped');
     setTimeout(() => { btns.style.opacity = '1'; btns.style.pointerEvents = 'all'; }, 400);
-    const w = fcQueue[fcIndex];
-    if (w) setTimeout(() => speakWord(w.word), 300);
   } else {
     fcFlipped = false;
     card.classList.remove('flipped');
@@ -1723,19 +1147,86 @@ function renderStats() {
   `;
 }
 
-// ─── SPEECH ───────────────────────────────────────────────────────────────────
-function speakWord(word) {
-  if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(word);
-  u.lang = 'en-US';
-  u.rate = 0.85;
-  speechSynthesis.speak(u);
+// ─── CAPTURED WORDS (tracker integration) ─────────────────────────────────────
+const TRACKER_URL = 'http://localhost:7777/words.json';
+let capturedWords = {};
+let capturedPollTimer = null;
+
+async function loadCaptured() {
+  try {
+    const r = await fetch(TRACKER_URL + '?_=' + Date.now());
+    if (!r.ok) throw new Error();
+    capturedWords = await r.json();
+    setCapturedStatus(true);
+  } catch(e) {
+    setCapturedStatus(false);
+  }
+  renderCaptured();
+}
+
+function setCapturedStatus(live) {
+  const dot = document.getElementById('captured-dot');
+  const label = document.getElementById('captured-status-label');
+  if (!dot) return;
+  if (live) {
+    dot.className = 'status-dot live';
+    const total = Object.keys(capturedWords).length;
+    label.textContent = `Tracker live — ${total} word${total !== 1 ? 's' : ''} collected`;
+  } else {
+    dot.className = 'status-dot offline';
+    label.textContent = 'Tracker offline — run tracker.py to start collecting';
+  }
+}
+
+function renderCaptured() {
+  const list = document.getElementById('captured-list');
+  if (!list) return;
+  const items = Object.values(capturedWords).sort((a, b) => b.count - a.count || a.word.localeCompare(b.word));
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✦</div><p>No words captured yet — start highlighting text while reading.</p></div>`;
+    return;
+  }
+  list.innerHTML = items.map(w => {
+    const alreadyInLib = words.some(lw => lw.word.toLowerCase() === w.word.toLowerCase());
+    return `<div class="captured-item">
+      <div style="flex:1">
+        <div class="captured-word">${w.word}</div>
+        <div class="captured-meta">${w.first_seen || ''} · highlighted ${w.count}×</div>
+      </div>
+      ${alreadyInLib
+        ? `<span class="captured-in-lib">In library</span>`
+        : `<button class="btn btn-primary" style="padding:7px 16px;font-size:10px;flex-shrink:0;" onclick="importCaptured('${w.word}')">+ Import</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function importCaptured(word) {
+  document.getElementById('inp-word').value = word;
+  document.getElementById('inp-def').value = '';
+  document.getElementById('inp-zh').value = '';
+  document.getElementById('inp-pron').value = '';
+  document.getElementById('inp-ex').value = '';
+  document.getElementById('inp-pos').value = '';
+  showView('words');
+  setTimeout(() => {
+    document.querySelector('.word-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    aiFill();
+  }, 100);
+}
+
+function startCapturedPolling() {
+  if (capturedPollTimer) return;
+  loadCaptured();
+  capturedPollTimer = setInterval(loadCaptured, 4000);
+}
+
+function stopCapturedPolling() {
+  if (capturedPollTimer) { clearInterval(capturedPollTimer); capturedPollTimer = null; }
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
-initDefEntries();
 renderWordList();
 updateNavCount();
 </script>
