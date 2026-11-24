@@ -430,6 +430,7 @@
     .list-controls input, .list-count { grid-column: 1 / -1; }
     .list-count { margin-left: 0; }
   }
+@media (max-width: 600px) { .nav-tools { gap: 5px; } .nav-tools .btn { padding-inline: 8px; } .nav-tools .stat-pill { display:none; } }
 </style>
 </head>
 <body>
@@ -443,6 +444,7 @@
     <button class="nav-tab" onclick="showView('captured')">Captured</button>
   </div>
   <div class="nav-tools">
+    <button class="btn btn-ghost" onclick="openSettings()">接入 API</button>
     <button class="btn btn-ghost" onclick="saveToFile()">Save</button>
     <!-- theme picker -->
     <div style="position:relative;">
@@ -564,6 +566,34 @@
   <div class="captured-list" id="captured-list"></div>
 </div>
 
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h3>AI Settings</h3>
+    <div style="margin-bottom:16px;">
+      <label>AI Provider</label>
+      <select id="settings-provider" onchange="onProviderChange()" style="width:100%;margin-top:4px;">
+        <option value="gemini">Gemini (gemini-2.5-flash)</option>
+        <option value="deepseek">DeepSeek (deepseek-chat)</option>
+      </select>
+    </div>
+    <div id="settings-gemini-section">
+      <p style="font-size:13px;color:var(--text3);margin-bottom:8px;">获取地址：<a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a></p>
+      <label>Gemini API Key</label>
+      <input type="password" id="settings-gemini-key" placeholder="AIza...">
+    </div>
+    <div id="settings-deepseek-section" style="display:none;">
+      <p style="font-size:13px;color:var(--text3);margin-bottom:8px;">获取地址：<a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:var(--accent)">platform.deepseek.com</a></p>
+      <label>DeepSeek API Key</label>
+      <input type="password" id="settings-deepseek-key" placeholder="sk-...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Edit Modal -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal">
@@ -676,10 +706,24 @@ function saveToFile() {
   URL.revokeObjectURL(url);
 }
 
-// ─── AI AUTOFILL (Gemini via local server) ─────────────────────────────────────
-const AI_SERVER_URL = 'http://localhost:8787';
+// ─── AI AUTOFILL ──────────────────────────────────────────────────────────────
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_KEY_STORAGE = 'lexicon_gemini_key';
+const DEEPSEEK_KEY_STORAGE = 'lexicon_deepseek_key';
+const PROVIDER_STORAGE = 'lexicon_ai_provider';
+
 let aiFillInFlight = false;
 let aiFillLastAt = 0;
+
+function getProvider() {
+  return localStorage.getItem(PROVIDER_STORAGE) || 'gemini';
+}
+function getApiKey() {
+  return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+}
+function getDeepSeekKey() {
+  return localStorage.getItem(DEEPSEEK_KEY_STORAGE) || '';
+}
 
 function setAiBtnState(loading) {
   const btn = document.getElementById('btn-ai-fill');
@@ -688,43 +732,25 @@ function setAiBtnState(loading) {
   btn.textContent = loading ? 'AI generating…' : 'Auto-fill with AI';
 }
 
-function aiUserFacingError(e) {
-  const msg = (e && e.message) ? e.message : String(e || 'Unknown error');
-  alert(
-    'AI 自動生成失敗。\n\n' +
-    '常見原因：\n' +
-    '1) 你還沒啟動本地 server（先在 server 目錄執行 npm start）\n' +
-    '2) server/.env 未設定 GEMINI_API_KEY\n' +
-    '3) Gemini 配額/網路問題\n\n' +
-    '錯誤訊息：' + msg
-  );
-}
-
 function aiNormalizePronunciation(s) {
   let t = (s || '').toString().trim();
   if (!t) return '';
-  // 如果模型返回了 /.../ 或 [...], 这里统一去掉外层符号，避免重复展示
   if ((t.startsWith('/') && t.endsWith('/')) || (t.startsWith('[') && t.endsWith(']'))) {
     t = t.slice(1, -1).trim();
   }
   return t;
 }
 
-async function aiFill() {
-  const word = document.getElementById('inp-word')?.value?.trim() || '';
-  const pos = document.getElementById('inp-pos')?.value || '';
-  if (!word) { alert('請先輸入 Word。'); return; }
+function extractJsonObject(text) {
+  if (typeof text !== 'string') return null;
+  const first = text.indexOf('{');
+  const last = text.lastIndexOf('}');
+  if (first === -1 || last === -1 || last <= first) return null;
+  try { return JSON.parse(text.slice(first, last + 1)); } catch { return null; }
+}
 
-  // 防抖/防誤觸：2 秒內不重複發送
-  const now = Date.now();
-  if (aiFillInFlight) return;
-  if (now - aiFillLastAt < 2000) return;
-  aiFillLastAt = now;
-
-  aiFillInFlight = true;
-  setAiBtnState(true);
-  try {
-    const r = await fetch(`${AI_SERVER_URL}/api/enrich`, {
+async function enrichLocally(word, pos) {
+    const r = await fetch('http://localhost:8787/api/enrich', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ word, pos })
@@ -734,55 +760,145 @@ async function aiFill() {
       const message = data?.message || data?.error || `HTTP ${r.status}`;
       throw new Error(message);
     }
-    const pronunciation = aiNormalizePronunciation((data?.pronunciation || '').toString().trim());
-    const definition_en = (data?.definition_en || '').toString().trim();
-    const chinese_zh = (data?.chinese_zh || '').toString().trim();
-    const example = (data?.example || '').toString().trim();
+    return data;
+}
 
+async function aiFill() {
+  const word = document.getElementById('inp-word')?.value?.trim() || '';
+  const pos = document.getElementById('inp-pos')?.value || '';
+  if (!word) { alert('请先输入 Word。'); return; }
+
+  const provider = getProvider();
+  const apiKey = provider === 'deepseek' ? getDeepSeekKey() : getApiKey();
+  const useLocal = !apiKey && ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (!apiKey && !useLocal) { openSettings(); return; }
+
+  const now = Date.now();
+  if (aiFillInFlight) return;
+  if (now - aiFillLastAt < 2000) return;
+  aiFillLastAt = now;
+  aiFillInFlight = true;
+  setAiBtnState(true);
+
+  try {
+    let obj;
+    if (useLocal) {
+      obj = await enrichLocally(word, pos);
+    } else {
+      const prompt = [
+        'You are helping a learner build an IELTS vocabulary notebook.',
+        'Generate concise, accurate fields for the given English word.',
+        'Return ONLY valid JSON (no markdown, no extra text).',
+        'JSON schema:',
+        '{',
+        '  "pronunciation": string,',
+        '  "pos": string,',
+        '  "definition_en": string,',
+        '  "chinese_zh": string,',
+        '  "example": string',
+        '}',
+        'Rules:',
+        '- pronunciation: IPA if possible, otherwise simple syllable hint; no surrounding slashes.',
+        '- pos: the primary part of speech; must be exactly one of: adjective, noun, verb, adverb, phrase.',
+        '- definition_en: one sentence, learner-friendly, IELTS-appropriate.',
+        '- chinese_zh: 简体中文释义，尽量精炼。',
+        '- example: one natural sentence using the word (IELTS style).',
+        '',
+        `Word: ${word}`,
+        pos ? `User-specified part of speech (use this if provided): ${pos}` : ''
+      ].filter(Boolean).join('\n');
+
+      let text = '';
+
+      if (provider === 'deepseek') {
+        const r = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.2,
+            max_tokens: 320
+          })
+        });
+        const data = await r.json().catch(() => null);
+        if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
+        text = data?.choices?.[0]?.message?.content || '';
+      } else {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+        const r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 320,
+              responseMimeType: 'application/json',
+              thinkingConfig: { thinkingBudget: 0 }
+            }
+          })
+        });
+        const data = await r.json().catch(() => null);
+        if (!r.ok) throw new Error(data?.error?.message || `HTTP ${r.status}`);
+        text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join('\n') || '';
+      }
+
+      obj = extractJsonObject(text);
+      if (!obj) throw new Error('无法解析 AI 返回的内容');
+    }
+    const pronunciation = aiNormalizePronunciation((obj.pronunciation || '').toString().trim());
+    const aiPos = (obj.pos || '').toString().trim().toLowerCase();
+    const definition_en = (obj.definition_en || '').toString().trim();
+    const chinese_zh = (obj.chinese_zh || '').toString().trim();
+    const example = (obj.example || '').toString().trim();
+
+    const validPos = ['adjective', 'noun', 'verb', 'adverb', 'phrase'];
     if (pronunciation) document.getElementById('inp-pron').value = pronunciation;
+    if (aiPos && validPos.includes(aiPos) && !pos) document.getElementById('inp-pos').value = aiPos;
     if (definition_en) document.getElementById('inp-def').value = definition_en;
     if (chinese_zh) document.getElementById('inp-zh').value = chinese_zh;
     if (example) document.getElementById('inp-ex').value = example;
   } catch (e) {
-    aiUserFacingError(e);
+    alert('AI 自动生成失败。\n\n错误信息：' + (e?.message || String(e)));
   } finally {
     aiFillInFlight = false;
     setAiBtnState(false);
   }
 }
-// 这是你的“呼叫 Gemini”的函数
-async function getGeminiResponse(userPrompt) {
-    // 【最重要！】把下面引号里的内容换成你在第一步申请到的通行证
-    const MY_API_KEY = "AIzaSyCB8sUIZOMJeGDniMpG2sbxqdaOOjEQWgw"; 
-    
-    // 这是 Gemini 服务器的地址
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MY_API_KEY}`;
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST', // 告诉服务器我们要“发消息”
-            headers: { 'Content-Type': 'application/json' }, // 告诉服务器消息格式是 JSON
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: userPrompt }] // 你想问 Gemini 的问题
-                }]
-            })
-        });
-
-        // 如果服务器不高兴（比如 Key 错了或网络不行），它会返回错误
-        if (!response.ok) {
-            throw new Error("服务器拒绝了请求，请检查 API Key 或网络");
-        }
-
-        const result = await response.json();
-        // 拿到 Gemini 说的话并返回
-        return result.candidates[0].content.parts[0].text;
-
-    } catch (err) {
-        console.error("出错了:", err);
-        return "哎呀，请求失败了，请检查一下你的网络连接！";
-    }
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function onProviderChange() {
+  const p = document.getElementById('settings-provider').value;
+  document.getElementById('settings-gemini-section').style.display = p === 'gemini' ? '' : 'none';
+  document.getElementById('settings-deepseek-section').style.display = p === 'deepseek' ? '' : 'none';
 }
+function openSettings() {
+  const provider = getProvider();
+  document.getElementById('settings-provider').value = provider;
+  document.getElementById('settings-gemini-key').value = getApiKey();
+  document.getElementById('settings-deepseek-key').value = getDeepSeekKey();
+  onProviderChange();
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+function saveSettings() {
+  const provider = document.getElementById('settings-provider').value;
+  const geminiKey = document.getElementById('settings-gemini-key').value.trim();
+  const deepseekKey = document.getElementById('settings-deepseek-key').value.trim();
+  const activeKey = provider === 'deepseek' ? deepseekKey : geminiKey;
+  if (!activeKey) { alert('请输入 API Key。'); return; }
+  localStorage.setItem(PROVIDER_STORAGE, provider);
+  if (geminiKey) localStorage.setItem(GEMINI_KEY_STORAGE, geminiKey);
+  if (deepseekKey) localStorage.setItem(DEEPSEEK_KEY_STORAGE, deepseekKey);
+  closeSettings();
+}
+document.getElementById('settings-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeSettings();
+});
+
 function getDefaultWords() {
   const t = Date.now();
   return [
